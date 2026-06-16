@@ -1,0 +1,162 @@
+/**
+ * Widerruf & Kontakt – Contact Form (frontend + editor preview).
+ *
+ * Theme-driven styling: labels above inputs, thin borders, spacing via
+ * theme spacing presets with safe fallbacks. Row 1 is a responsive grid that
+ * collapses to a single column on mobile.
+ */
+
+.wk-contact-form-wrap {
+	--wk-cf-gap: var(--wp--preset--spacing--30, 1.5rem);
+	--wk-cf-field-gap: 0.4rem;
+	--wk-cf-border: #cacaca;
+}
+
+.wk-contact-form {
+	display: flex;
+	flex-direction: column;
+	gap: var(--wk-cf-gap);
+}
+
+.wk-contact-form .wk-cf-row {
+	margin: 0;
+}
+
+/* Row 1: responsive field grid */
+.wk-cf-row--fields {
+	display: grid;
+	gap: var(--wk-cf-gap);
+	grid-template-columns: repeat( var( --wk-cf-cols, 3 ), minmax( 0, 1fr ) );
+}
+
+.wk-cf-row--fields[data-cols="1"] { --wk-cf-cols: 1; }
+.wk-cf-row--fields[data-cols="2"] { --wk-cf-cols: 2; }
+.wk-cf-row--fields[data-cols="3"] { --wk-cf-cols: 3; }
+
+/* Field: label above input */
+.wk-cf-field {
+	display: flex;
+	flex-direction: column;
+	gap: var(--wk-cf-field-gap);
+	margin: 0;
+}
+
+.wk-cf-field label {
+	font-size: var(--wp--preset--font-size--small, 0.9rem);
+	line-height: 1.3;
+}
+
+.wk-cf-req {
+	color: inherit;
+}
+
+.wk-contact-form input[type="text"],
+.wk-contact-form input[type="email"],
+.wk-contact-form input[type="tel"],
+.wk-contact-form textarea {
+	width: 100%;
+	box-sizing: border-box;
+	padding: 0.7em 0.9em;
+	font: inherit;
+	color: inherit;
+	background: transparent;
+	border: 1px solid var(--wk-cf-border);
+	border-radius: 6px;
+}
+
+.wk-contact-form textarea {
+	resize: vertical;
+	min-height: 8rem;
+}
+
+.wk-contact-form input:focus,
+.wk-contact-form textarea:focus {
+	outline: 2px solid var(--wp--preset--color--primary, #1a1a1a);
+	outline-offset: 1px;
+}
+
+.wk-contact-form input[aria-invalid="true"],
+.wk-contact-form textarea[aria-invalid="true"] {
+	border-color: #d63638;
+	outline-color: #d63638;
+}
+
+/* Consent row */
+.wk-cf-consent .wk-cf-consent-label {
+	display: flex;
+	align-items: flex-start;
+	gap: 0.6rem;
+	font-size: var(--wp--preset--font-size--small, 0.85rem);
+	line-height: 1.5;
+}
+
+.wk-cf-consent input[type="checkbox"] {
+	margin-top: 0.2em;
+	flex: 0 0 auto;
+}
+
+.wk-cf-consent-text a {
+	text-decoration: underline;
+}
+
+/* Submit: inherit theme button styles via wp-block-button markup */
+.wk-cf-submit-row.wp-block-buttons {
+	margin: 0;
+}
+
+.wk-cf-submit-row .wp-block-button {
+	margin: 0;
+}
+
+.wk-cf-submit[aria-busy="true"],
+.wk-cf-submit.is-busy {
+	opacity: 0.7;
+	cursor: progress;
+}
+
+/* Honeypot */
+.wk-cf-hp {
+	position: absolute !important;
+	left: -9999px !important;
+	top: auto;
+	width: 1px;
+	height: 1px;
+	overflow: hidden;
+}
+
+/* Field error text */
+.wk-cf-error {
+	color: #d63638;
+	font-size: 0.85em;
+	line-height: 1.3;
+}
+
+/* Feedback (non-field errors) */
+.wk-cf-feedback {
+	padding: 0.8em 1em;
+	border-radius: 2px;
+	font-size: var(--wp--preset--font-size--small, 0.9rem);
+}
+
+.wk-cf-feedback--error {
+	background: #fcf0f1;
+	color: #8a1f23;
+	border: 1px solid #d63638;
+}
+
+/* Success message (replaces the form) */
+.wk-cf-success {
+	padding: 1.2em 1.4em;
+	border-radius: 2px;
+	background: var(--wp--preset--color--tertiary, #f0f0f0);
+	border: 1px solid var(--wk-cf-border);
+	font-size: var(--wp--preset--font-size--medium, 1rem);
+	outline: none;
+}
+
+/* Mobile: single column */
+@media (max-width: 781px) {
+	.wk-cf-row--fields {
+		grid-template-columns: 1fr;
+	}
+}

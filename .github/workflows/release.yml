@@ -1,0 +1,52 @@
+name: Create Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Get version from tag
+        id: get_version
+        run: echo "VERSION=${GITHUB_REF#refs/tags/v}" >> $GITHUB_OUTPUT
+
+      - name: Create plugin ZIP
+        run: |
+          mkdir -p dist/widerruf-kontakt
+          cp -r assets dist/widerruf-kontakt/
+          cp -r inc    dist/widerruf-kontakt/
+          cp -r vendor dist/widerruf-kontakt/
+          cp -r languages dist/widerruf-kontakt/ 2>/dev/null || true
+          cp widerruf-kontakt.php dist/widerruf-kontakt/
+          cp readme.txt dist/widerruf-kontakt/ 2>/dev/null || true
+          cd dist
+          zip -r widerruf-kontakt.zip widerruf-kontakt
+          mv widerruf-kontakt.zip ../
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v1
+        with:
+          name: Widerruf & Kontakt v${{ steps.get_version.outputs.VERSION }}
+          body: |
+            ## Widerruf & Kontakt v${{ steps.get_version.outputs.VERSION }}
+
+            ### Installation
+            1. ZIP herunterladen
+            2. WordPress Admin → Plugins → Installieren → Plugin hochladen
+            3. ZIP auswählen und aktivieren
+
+            ### Auto-Update
+            Bestehende Installationen erhalten das Update automatisch im WordPress Admin.
+          files: widerruf-kontakt.zip
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

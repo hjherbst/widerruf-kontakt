@@ -32,7 +32,7 @@ Datenschutzkonformes Widerrufsformular und Kontaktformular als native Gutenberg-
 
 == Installation ==
 
-1. ZIP von der [GitHub Releases-Seite](https://github.com/hjherbst/widerruf-kontakt/releases) herunterladen
+1. ZIP von der [Plugin-Seite](https://gutenblock.com/widerruf-kontakt) oder der [GitHub Releases-Seite](https://github.com/hjherbst/widerruf-kontakt/releases) herunterladen
 2. WordPress Admin → Plugins → Installieren → Plugin hochladen → ZIP auswählen → Aktivieren
 3. Admin-Menü „Widerruf & Kontakt" → Anleitung aufrufen
 

@@ -1,7 +1,7 @@
 <?php
 /**
  * Plugin Name: Widerruf & Kontakt
- * Plugin URI: https://github.com/hjherbst/widerruf-kontakt
+ * Plugin URI: https://gutenblock.com/widerruf-kontakt
  * Description: Datenschutzkonformes Widerrufsformular und Kontaktformular als native Gutenberg-Blöcke. Ideal für die gesetzliche Widerrufsrecht-Pflicht bei Waren, digitalen Produkten und Verträgen. Mit SMTP-Setup und automatischen Eingangsbestätigungen. Free, no account required.
  * Version: 1.0.0
  * Requires at least: 6.3

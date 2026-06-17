@@ -4,7 +4,7 @@ Tags: widerruf, widerrufsformular, kontaktformular, withdrawal, contact form, DS
 Requires at least: 6.3
 Tested up to: 6.8
 Requires PHP: 7.4
-Stable tag: 1.1.0
+Stable tag: 1.1.1
 License: GPL-2.0-or-later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -53,6 +53,9 @@ Ja. Die Plugins verwenden unterschiedliche Prefixe und Datenbank-Optionen und la
 Das Plugin stellt das technische Werkzeug bereit. Widerrufsbelehrung, AGB und die konkrete rechtliche Umsetzung sind mit einem Anwalt abzustimmen.
 
 == Changelog ==
+
+= 1.1.1 =
+* Brevo-Hinweis korrigiert: SMTP-Anmeldung aus „Deine SMTP-Einstellungen“ (z. B. name@smtp-brevo.com)
 
 = 1.1.0 =
 * Block-Breite (weit/voll) wird im Frontend korrekt übernommen

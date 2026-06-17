@@ -4,6 +4,10 @@ All notable changes to this project are documented here.
 Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 versioning follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.1.1] – 2026-06-17
+
+- Fix Brevo field copy: SMTP login is the address from “Your SMTP settings” (e.g. name@smtp-brevo.com), not the Brevo sign-in email
+
 ## [1.1.0] – 2026-06-17
 
 - Honour block toolbar width (`alignwide` / `alignfull`) on the frontend

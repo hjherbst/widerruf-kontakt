@@ -42,6 +42,14 @@ class WK_Revocation_Form {
 
 	public function register_block() {
 		register_block_type( self::BLOCK_NAME, array(
+			// Declare align support server-side too, so get_block_wrapper_attributes()
+			// emits the alignwide/alignfull class chosen in the editor toolbar.
+			'supports'        => array(
+				'align' => array( 'wide', 'full' ),
+			),
+			'attributes'      => array(
+				'align' => array( 'type' => 'string' ),
+			),
 			'render_callback' => array( $this, 'render_block' ),
 		) );
 	}
@@ -71,16 +79,11 @@ class WK_Revocation_Form {
 		$de = array(
 			'name'              => 'Name',
 			'email'             => 'E-Mail-Adresse',
-			'email_help'        => 'Ihre Eingangsbestätigung wird an diese Adresse gesendet.',
 			'order_number'      => 'Bestell- oder Buchungsnummer',
-			'order_number_help' => 'Diese finden Sie in Ihrer Bestellbestätigung.',
 			'order_date'        => 'Bestellt am',
 			'receipt_date'      => 'Erhalten am',
-			'receipt_date_help' => 'Datum, an dem Sie die Ware erhalten bzw. den Vertrag geschlossen haben.',
 			'address'           => 'Anschrift',
-			'items_help'        => 'Leer lassen, um den gesamten Vertrag zu widerrufen. Für einen Teilwiderruf geben Sie die betroffenen Positionen an.',
 			'reason'            => 'Grund des Widerrufs (optional)',
-			'reason_help'       => 'Die Angabe eines Grundes ist freiwillig.',
 			'submit'            => 'Widerruf absenden',
 			'sending'           => 'Wird gesendet…',
 			'success'           => 'Vielen Dank! Ihr Widerruf wurde übermittelt.',
@@ -109,16 +112,11 @@ class WK_Revocation_Form {
 		$en = array(
 			'name'              => 'Name',
 			'email'             => 'Email address',
-			'email_help'        => 'Your confirmation of receipt will be sent to this address.',
 			'order_number'      => 'Order or booking number',
-			'order_number_help' => 'You will find it in your order confirmation.',
 			'order_date'        => 'Ordered on',
 			'receipt_date'      => 'Received on',
-			'receipt_date_help' => 'Date you received the goods or concluded the contract.',
 			'address'           => 'Address',
-			'items_help'        => 'Leave empty to withdraw from the entire contract. For a partial withdrawal, list the affected items.',
 			'reason'            => 'Reason for withdrawal (optional)',
-			'reason_help'       => 'Providing a reason is voluntary.',
 			'submit'            => 'Submit withdrawal',
 			'sending'           => 'Sending…',
 			'success'           => 'Thank you! Your withdrawal has been submitted.',
@@ -209,15 +207,11 @@ class WK_Revocation_Form {
 			'deliveryNote'        => $de ? 'Empfänger und SMTP werden aus den Plugin-Einstellungen übernommen.' : 'Recipient and SMTP are taken from the plugin settings.',
 			'name'                => $s['name'],
 			'email'               => $s['email'],
-			'emailHelp'           => $s['email_help'],
 			'orderNumber'         => $s['order_number'],
-			'orderNumberHelp'     => $s['order_number_help'],
 			'orderDate'           => $s['order_date'],
 			'receiptDate'         => $s['receipt_date'],
 			'address'             => $s['address'],
-			'itemsHelp'           => $s['items_help'],
 			'reason'              => $s['reason'],
-			'reasonHelp'          => $s['reason_help'],
 			'consent'             => $s['consent'],
 			'submit'              => $s['submit'],
 			'success'             => $s['success'],
@@ -287,12 +281,18 @@ class WK_Revocation_Form {
 		$req_mark = '<span class="wk-rf-req" aria-hidden="true">*</span>';
 		$fid      = esc_attr( $form_id );
 
+		// Merge block-supports wrapper attributes (e.g. alignwide/alignfull) so the
+		// content width chosen in the block toolbar is honoured on the frontend.
+		$wrapper_attributes = get_block_wrapper_attributes( array(
+			'class'                  => 'wk-revocation-form-wrap',
+			'data-wk-revocation-form' => '',
+			'data-form-id'           => $form_id,
+			'data-success'           => $success_msg,
+		) );
+
 		ob_start();
 		?>
-		<div class="wk-revocation-form-wrap"
-			data-wk-revocation-form
-			data-form-id="<?php echo $fid; ?>"
-			data-success="<?php echo esc_attr( $success_msg ); ?>">
+		<div <?php echo $wrapper_attributes; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- escaped by get_block_wrapper_attributes. ?>>
 			<form class="wk-revocation-form" novalidate>
 				<div class="wk-rf-feedback" role="alert" aria-live="assertive" hidden></div>
 				<div class="wk-rf-row wk-rf-row--fields" data-cols="<?php echo esc_attr( $cols ); ?>">
@@ -304,14 +304,12 @@ class WK_Revocation_Form {
 					<?php endif; ?>
 					<p class="wk-rf-field">
 						<label for="<?php echo $fid; ?>-email"><?php echo esc_html( $s['email'] ); ?> <?php echo $req_mark; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?></label>
-						<input type="email" id="<?php echo $fid; ?>-email" name="email" autocomplete="email" required aria-required="true" aria-describedby="<?php echo $fid; ?>-email-help" />
-						<span class="wk-rf-help" id="<?php echo $fid; ?>-email-help"><?php echo esc_html( $s['email_help'] ); ?></span>
+						<input type="email" id="<?php echo $fid; ?>-email" name="email" autocomplete="email" required aria-required="true" />
 					</p>
 					<?php if ( $show_order ) : ?>
 						<p class="wk-rf-field">
 							<label for="<?php echo $fid; ?>-order"><?php echo esc_html( $s['order_number'] ); ?><?php echo $order_req ? ' ' . $req_mark : ''; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?></label>
-							<input type="text" id="<?php echo $fid; ?>-order" name="order_number" maxlength="<?php echo esc_attr( self::MAX_ORDER ); ?>" aria-describedby="<?php echo $fid; ?>-order-help" <?php echo $order_req ? 'required aria-required="true"' : ''; ?> />
-							<span class="wk-rf-help" id="<?php echo $fid; ?>-order-help"><?php echo esc_html( $s['order_number_help'] ); ?></span>
+							<input type="text" id="<?php echo $fid; ?>-order" name="order_number" maxlength="<?php echo esc_attr( self::MAX_ORDER ); ?>" <?php echo $order_req ? 'required aria-required="true"' : ''; ?> />
 						</p>
 					<?php endif; ?>
 				</div>
@@ -323,16 +321,14 @@ class WK_Revocation_Form {
 						</p>
 						<p class="wk-rf-field">
 							<label for="<?php echo $fid; ?>-receipt-date"><?php echo esc_html( $s['receipt_date'] ); ?></label>
-							<input type="date" id="<?php echo $fid; ?>-receipt-date" name="receipt_date" aria-describedby="<?php echo $fid; ?>-receipt-help" />
-							<span class="wk-rf-help" id="<?php echo $fid; ?>-receipt-help"><?php echo esc_html( $s['receipt_date_help'] ); ?></span>
+							<input type="date" id="<?php echo $fid; ?>-receipt-date" name="receipt_date" />
 						</p>
 					</div>
 				<?php endif; ?>
 				<div class="wk-rf-row">
 					<p class="wk-rf-field">
 						<label for="<?php echo $fid; ?>-items"><?php echo esc_html( $items_label ); ?></label>
-						<textarea id="<?php echo $fid; ?>-items" name="items" rows="3" maxlength="<?php echo esc_attr( self::MAX_ITEMS ); ?>" aria-describedby="<?php echo $fid; ?>-items-help"></textarea>
-						<span class="wk-rf-help" id="<?php echo $fid; ?>-items-help"><?php echo esc_html( $s['items_help'] ); ?></span>
+						<textarea id="<?php echo $fid; ?>-items" name="items" rows="3" maxlength="<?php echo esc_attr( self::MAX_ITEMS ); ?>"></textarea>
 					</p>
 				</div>
 				<?php if ( $show_address ) : ?>
@@ -347,8 +343,7 @@ class WK_Revocation_Form {
 					<div class="wk-rf-row">
 						<p class="wk-rf-field">
 							<label for="<?php echo $fid; ?>-reason"><?php echo esc_html( $s['reason'] ); ?></label>
-							<textarea id="<?php echo $fid; ?>-reason" name="reason" rows="4" maxlength="<?php echo esc_attr( self::MAX_REASON ); ?>" aria-describedby="<?php echo $fid; ?>-reason-help"></textarea>
-							<span class="wk-rf-help" id="<?php echo $fid; ?>-reason-help"><?php echo esc_html( $s['reason_help'] ); ?></span>
+							<textarea id="<?php echo $fid; ?>-reason" name="reason" rows="4" maxlength="<?php echo esc_attr( self::MAX_REASON ); ?>"></textarea>
 						</p>
 					</div>
 				<?php endif; ?>

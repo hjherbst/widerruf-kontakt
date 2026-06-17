@@ -18,6 +18,7 @@ class WK_Admin {
 	public function init() {
 		add_action( 'admin_menu', array( $this, 'register_menu' ) );
 		add_action( 'admin_post_wk_create_revocation_page', array( $this, 'handle_create_page' ) );
+		add_action( 'admin_notices', array( $this, 'maybe_smtp_notice' ) );
 	}
 
 	public function register_menu() {
@@ -81,74 +82,90 @@ class WK_Admin {
 	}
 
 	private function build_page_content( $de ) {
-		// Draft page: heading + merchant details placeholder + model text + block.
+		// Draft page: a full-width group with a heading, a short intro and the
+		// withdrawal form (set to wide alignment) – ready to edit.
 		if ( $de ) {
-			$merchant_block = '<!-- wp:paragraph {"className":"wk-merchant-info"} -->' . "\n"
-				. '<p class="wk-merchant-info"><strong>Händlerangaben (bitte ausfüllen):</strong><br>'
-				. 'Firmenname: [Ihr Name / Firma]<br>'
-				. 'Straße + Hausnummer: [Ihre Anschrift]<br>'
-				. 'PLZ, Ort: [PLZ Ort]<br>'
-				. 'E-Mail: [Ihre E-Mail-Adresse]</p>' . "\n"
-				. '<!-- /wp:paragraph -->';
-
-			$model_text_block = '<!-- wp:paragraph -->' . "\n"
-				. '<p><strong>Muster-Widerrufsformular</strong> (bitte nur ausfüllen und absenden, wenn Sie den Vertrag widerrufen wollen)</p>' . "\n"
-				. '<!-- /wp:paragraph -->' . "\n"
-				. '<!-- wp:paragraph -->' . "\n"
-				. '<p>An [Name des Unternehmers], [Anschrift des Unternehmers], [E-Mail des Unternehmers]:<br>'
-				. 'Hiermit widerrufe(n) ich/wir (*) den von mir/uns (*) abgeschlossenen Vertrag über den Kauf der folgenden Waren (*) / die Erbringung der folgenden Dienstleistung (*)<br>'
-				. '– Bestellt am (*)/erhalten am (*)<br>'
-				. '– Name des/der Verbraucher(s)<br>'
-				. '– Anschrift des/der Verbraucher(s)<br>'
-				. '– Unterschrift des/der Verbraucher(s) (nur bei Mitteilung auf Papier)<br>'
-				. '– Datum<br>'
-				. '(*) Unzutreffendes streichen.</p>' . "\n"
-				. '<!-- /wp:paragraph -->' . "\n"
-				. '<!-- wp:separator --><hr class="wp-block-separator has-alpha-channel-opacity"/><!-- /wp:separator -->';
-
-			$form_note_block = '<!-- wp:paragraph {"fontSize":"small"} -->' . "\n"
-				. '<p class="has-small-font-size">Alternativ können Sie das folgende Formular nutzen:</p>' . "\n"
-				. '<!-- /wp:paragraph -->';
+			$heading = 'Vertrag widerrufen';
+			$intro   = 'Online geschlossene Verträge können innerhalb von 14 Tagen widerrufen werden. Bitte das Formular ausfüllen, um den Widerruf einzureichen.';
 		} else {
-			$merchant_block = '<!-- wp:paragraph {"className":"wk-merchant-info"} -->' . "\n"
-				. '<p class="wk-merchant-info"><strong>Merchant details (please fill in):</strong><br>'
-				. 'Company: [Your name / company]<br>'
-				. 'Street: [Your address]<br>'
-				. 'City: [Postcode City]<br>'
-				. 'Email: [Your email address]</p>' . "\n"
-				. '<!-- /wp:paragraph -->';
-
-			$model_text_block = '<!-- wp:paragraph -->' . "\n"
-				. '<p><strong>Model withdrawal form</strong> (complete and return this form only if you wish to withdraw from the contract)</p>' . "\n"
-				. '<!-- /wp:paragraph -->' . "\n"
-				. '<!-- wp:paragraph -->' . "\n"
-				. '<p>To [Name of entrepreneur], [Address of entrepreneur], [Email of entrepreneur]:<br>'
-				. 'I/We (*) hereby give notice that I/We (*) withdraw from my/our (*) contract of sale of the following goods (*) / for the provision of the following service (*)<br>'
-				. '– Ordered on (*) / received on (*)<br>'
-				. '– Name of consumer(s)<br>'
-				. '– Address of consumer(s)<br>'
-				. '– Signature of consumer(s) (only if this form is notified on paper)<br>'
-				. '– Date<br>'
-				. '(*) Delete as appropriate.</p>' . "\n"
-				. '<!-- /wp:paragraph -->' . "\n"
-				. '<!-- wp:separator --><hr class="wp-block-separator has-alpha-channel-opacity"/><!-- /wp:separator -->';
-
-			$form_note_block = '<!-- wp:paragraph {"fontSize":"small"} -->' . "\n"
-				. '<p class="has-small-font-size">Alternatively, you can use the form below:</p>' . "\n"
-				. '<!-- /wp:paragraph -->';
+			$heading = 'Withdraw from contract';
+			$intro   = 'Contracts concluded online can be withdrawn within 14 days. Please fill in the form to submit your withdrawal.';
 		}
 
-		$form_block = '<!-- wp:widerruf-kontakt/revocation-form /-->';
+		$form_id = 'wkrf-' . wp_generate_password( 8, false, false );
 
-		return $merchant_block . "\n\n"
-			. $model_text_block . "\n\n"
-			. $form_note_block . "\n\n"
-			. $form_block;
+		return '<!-- wp:group {"metadata":{"name":"widerruf"},"align":"full","style":{"spacing":{"padding":{"top":"var:preset|spacing|50","bottom":"var:preset|spacing|50","left":"var:preset|spacing|30","right":"var:preset|spacing|30"}}},"layout":{"type":"constrained"}} -->' . "\n"
+			. '<div class="wp-block-group alignfull" style="padding-top:var(--wp--preset--spacing--50);padding-right:var(--wp--preset--spacing--30);padding-bottom:var(--wp--preset--spacing--50);padding-left:var(--wp--preset--spacing--30)"><!-- wp:group {"align":"wide","layout":{"type":"default"}} -->' . "\n"
+			. '<div class="wp-block-group alignwide"><!-- wp:group {"align":"wide","style":{"spacing":{"margin":{"bottom":"var:preset|spacing|40"}}},"layout":{"type":"flex","orientation":"vertical"}} -->' . "\n"
+			. '<div class="wp-block-group alignwide" style="margin-bottom:var(--wp--preset--spacing--40)"><!-- wp:heading {"level":1,"fontSize":"x-large"} -->' . "\n"
+			. '<h1 class="wp-block-heading has-x-large-font-size">' . esc_html( $heading ) . '</h1>' . "\n"
+			. '<!-- /wp:heading -->' . "\n\n"
+			. '<!-- wp:paragraph {"fontSize":"small"} -->' . "\n"
+			. '<p class="has-small-font-size">' . esc_html( $intro ) . '</p>' . "\n"
+			. '<!-- /wp:paragraph --></div>' . "\n"
+			. '<!-- /wp:group -->' . "\n\n"
+			. '<!-- wp:widerruf-kontakt/revocation-form {"formId":"' . esc_attr( $form_id ) . '","align":"wide"} /--></div>' . "\n"
+			. '<!-- /wp:group --></div>' . "\n"
+			. '<!-- /wp:group -->';
 	}
 
 	// -------------------------------------------------------------------------
 	// Guide page
 	// -------------------------------------------------------------------------
+
+	/**
+	 * Show a warning on plugin admin screens when SMTP is not configured yet.
+	 */
+	public function maybe_smtp_notice() {
+		if ( ! current_user_can( 'manage_options' ) ) {
+			return;
+		}
+
+		$screen = function_exists( 'get_current_screen' ) ? get_current_screen() : null;
+		if ( ! $screen || false === strpos( $screen->id, 'widerruf-kontakt' ) ) {
+			return;
+		}
+
+		if ( WK_Mailer::smtp_configured() ) {
+			return;
+		}
+
+		$de       = wk_is_de();
+		$mail_url = admin_url( 'admin.php?page=widerruf-kontakt-mail' );
+		$on_mail  = ( 'widerruf-kontakt_page_widerruf-kontakt-mail' === $screen->id );
+
+		if ( $on_mail ) {
+			$title = $de ? 'E-Mail-Versand noch nicht eingerichtet' : 'Email delivery not configured yet';
+			$body  = $de
+				? 'Formulare können erst zuverlässig versendet werden, wenn SMTP-Daten hinterlegt sind. Bitte unten einen Versandweg wählen, Zugangsdaten eintragen und speichern.'
+				: 'Forms can only be sent reliably once SMTP credentials are saved. Choose a sending method below, enter your credentials and save.';
+		} else {
+			$title = $de ? 'E-Mail-Versand noch nicht eingerichtet' : 'Email delivery not configured yet';
+			$body  = $de
+				? sprintf(
+					'Ohne SMTP-Einstellungen kommen eingereichte Formulare nicht zuverlässig an. Bitte unter <a href="%s">E-Mail-Versand</a> Brevo, ein Postfach oder manuelles SMTP einrichten.',
+					esc_url( $mail_url )
+				)
+				: sprintf(
+					'Without SMTP settings, submitted forms will not arrive reliably. Set up Brevo, a mailbox or manual SMTP under <a href="%s">Email delivery</a>.',
+					esc_url( $mail_url )
+				);
+		}
+		?>
+		<div class="notice notice-warning" style="border-left-color:#dba617;padding:12px 16px;">
+			<p style="margin:0;font-size:14px;line-height:1.5;">
+				<strong style="display:block;margin-bottom:4px;"><?php echo esc_html( $title ); ?></strong>
+				<?php
+				if ( $on_mail ) {
+					echo esc_html( $body );
+				} else {
+					echo wp_kses( $body, array( 'a' => array( 'href' => array() ) ) );
+				}
+				?>
+			</p>
+		</div>
+		<?php
+	}
 
 	public function render_guide() {
 		if ( ! current_user_can( 'manage_options' ) ) {
@@ -204,12 +221,6 @@ class WK_Admin {
 							: 'Use the quick-start button above, or manually create a new WordPress page (e.g. "Withdrawal").' ); ?>
 					</li>
 					<li>
-						<strong><?php echo esc_html( $de ? 'Händlerangaben ergänzen' : 'Add merchant details' ); ?></strong><br>
-						<?php echo esc_html( $de
-							? 'Füge deine Pflichtangaben (Name/Firma, Anschrift, E-Mail) oberhalb des Formulars ein. Diese Angaben sind gesetzlich vorgeschrieben.'
-							: 'Add your mandatory details (name/company, address, email) above the form. These are legally required.' ); ?>
-					</li>
-					<li>
 						<strong><?php echo esc_html( $de ? 'Widerrufsformular-Block einsetzen' : 'Insert the withdrawal form block' ); ?></strong><br>
 						<?php echo esc_html( $de
 							? 'Suche im Block-Editor nach „Widerrufsformular" (Block aus diesem Plugin). Vertragstyp und Felder im Inspector anpassen.'
@@ -242,19 +253,10 @@ class WK_Admin {
 				</ol>
 			</div>
 
-			<?php // EU withdrawal-function note (from 2026-06-19). ?>
-			<div class="wk-guide-eu-note">
-				<h2><?php echo esc_html( $de ? '📋 EU-Widerrufsfunktion (ab 19. Juni 2026)' : '📋 EU withdrawal function (from 19 June 2026)' ); ?></h2>
-				<p><?php echo esc_html( $de
-					? 'Die EU-Richtlinie über Finanzdienstleistungen im Fernabsatz (2023/2673/EU) verlangt ab dem 19. Juni 2026 für Fernabsatz-Finanzdienstleistungen eine deutlich zugängliche „Widerrufsfunktion". Empfehlung: Setze einen gut sichtbaren Footer-Link oder Button mit dem Text „Vertrag widerrufen" bzw. „Widerrufsrecht nutzen", der direkt auf deine Widerrufsseite führt. Dies gilt insbesondere für Online-Vertragsabschlüsse (z. B. digitale Produkte mit Abonnement, Finanzprodukte).'
-					: 'The EU Directive on distance financial services (2023/2673/EU) requires, from 19 June 2026, a clearly accessible "withdrawal function" for distance financial services. Recommendation: add a prominently visible footer link or button labelled "Withdraw contract" or "Exercise right of withdrawal", pointing directly to your withdrawal page. This is especially relevant for online contracts (e.g. digital subscription products, financial products).' ); ?></p>
-			</div>
-
 			<?php // Important notes. ?>
 			<div class="wk-guide-notes">
 				<h2><?php echo esc_html( $de ? 'Wichtige Hinweise' : 'Important notes' ); ?></h2>
 				<ul>
-					<li><?php echo esc_html( $de ? 'Pflichtangaben des Unternehmers müssen oberhalb des Formulars stehen.' : 'Mandatory merchant details must appear above the form.' ); ?></li>
 					<li><?php echo esc_html( $de ? 'Der Absender erhält automatisch eine Eingangsbestätigung per E-Mail.' : 'The sender automatically receives a confirmation of receipt by email.' ); ?></li>
 					<li><?php echo esc_html( $de ? 'Keine Datenbankprotokollierung der Einreichungen (DSGVO-Datensparsamkeit).' : 'No database logging of submissions (GDPR data minimisation).' ); ?></li>
 					<li><?php echo esc_html( $de ? 'Spam-Schutz: Honeypot + IP-Rate-Limit sind aktiv.' : 'Spam protection: honeypot + IP rate limit are active.' ); ?></li>
@@ -265,8 +267,8 @@ class WK_Admin {
 			<?php // Disclaimer. ?>
 			<div class="wk-guide-disclaimer">
 				<p><?php echo esc_html( $de
-					? '⚠️ Kein Rechtsrat: Dieses Plugin stellt ein technisches Werkzeug bereit. Widerrufsbelehrung, AGB und rechtliche Anforderungen sind mit einem Anwalt oder einem spezialisierten Rechtsdienst (z. B. IT-Recht Kanzlei, e-recht24) abzustimmen.'
-					: '⚠️ No legal advice: This plugin provides a technical tool. The right-of-withdrawal notice, terms and conditions and legal requirements must be verified with a lawyer or a specialised legal service.' ); ?></p>
+					? '⚠️ Kein Rechtsrat: Dieses Plugin stellt ein technisches Werkzeug bereit. Widerrufsbelehrung, AGB und rechtliche Anforderungen sind mit einem Anwalt abzustimmen.'
+					: '⚠️ No legal advice: This plugin provides a technical tool. The right-of-withdrawal notice, terms and conditions and legal requirements must be verified with a lawyer.' ); ?></p>
 			</div>
 		</div>
 		<?php
@@ -278,7 +280,7 @@ class WK_Admin {
 		<style>
 		.wk-guide { max-width: 860px; }
 		.wk-guide-version { color: #646970; font-size: 12px; margin-top: -8px; margin-bottom: 1.5rem; }
-		.wk-guide-cta, .wk-guide-steps, .wk-guide-eu-note, .wk-guide-notes, .wk-guide-disclaimer {
+		.wk-guide-cta, .wk-guide-steps, .wk-guide-notes, .wk-guide-disclaimer {
 			background: #fff; border: 1px solid #c3c4c7; border-radius: 6px;
 			padding: 1.25rem 1.5rem; margin-bottom: 1.25rem;
 		}
@@ -286,15 +288,13 @@ class WK_Admin {
 		.wk-guide-cta h2 { margin-top: 0; }
 		.wk-guide-cta .button-hero { margin: .5rem 0; font-size: 15px !important; }
 		.wk-guide-cta .description { margin-top: .4rem; color: #646970; }
-		.wk-guide-steps h2, .wk-guide-eu-note h2, .wk-guide-notes h2 { margin-top: 0; }
+		.wk-guide-steps h2, .wk-guide-notes h2 { margin-top: 0; }
 		.wk-guide-steps ol { margin: .75rem 0 0 1.2rem; }
 		.wk-guide-steps li { margin-bottom: .9rem; line-height: 1.55; }
 		.wk-guide-notes ul { margin: .5rem 0 0 1.2rem; }
 		.wk-guide-notes li { margin-bottom: .4rem; line-height: 1.5; }
 		.wk-guide-disclaimer { background: #fcf9e8; border-color: #dba617; }
 		.wk-guide-disclaimer p { margin: 0; line-height: 1.55; }
-		.wk-guide-eu-note { background: #f0f6fc; border-color: #72aee6; }
-		.wk-guide-eu-note p { margin: 0; line-height: 1.55; }
 		</style>
 		<?php
 	}

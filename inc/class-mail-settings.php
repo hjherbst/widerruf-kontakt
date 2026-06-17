@@ -209,12 +209,24 @@ class WK_Mail_Settings {
 					<ol class="wk-cf-steps">
 						<li><?php echo esc_html( $de ? 'Kostenloses Konto bei Brevo erstellen und Absender bestätigen.' : 'Create a free Brevo account and confirm your sender address.' ); ?></li>
 						<li><?php printf( $de ? 'Unter "SMTP &amp; API" einen %s erzeugen.' : 'Under "SMTP &amp; API", create a %s.', '<a href="' . esc_url( $brevo_url ) . '" target="_blank" rel="noopener noreferrer">' . ( $de ? 'SMTP-Schlüssel' : 'SMTP key' ) . '</a>' ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?></li>
-						<li><?php echo esc_html( $de ? 'SMTP-Login und SMTP-Schlüssel hier einfügen.' : 'Paste the SMTP login and SMTP key below.' ); ?></li>
+						<li><?php echo esc_html( $de ? 'Deine Brevo-Konto-E-Mail und den SMTP-Schlüssel unten einfügen.' : 'Paste your Brevo account email and SMTP key below.' ); ?></li>
 					</ol>
 					<table class="form-table" role="presentation">
-						<tr><th><label for="wk_brevo_user"><?php echo esc_html( $de ? 'SMTP-Login (Benutzername)' : 'SMTP login (username)' ); ?></label></th><td><input type="text" class="regular-text" id="wk_brevo_user" name="wk_brevo_user" value="<?php echo 'brevo' === $method ? esc_attr( $user ) : ''; ?>" autocomplete="off" /></td></tr>
+						<tr>
+							<th><label for="wk_brevo_user"><?php echo esc_html( $de ? 'Brevo-Konto-E-Mail' : 'Brevo account email' ); ?></label></th>
+							<td>
+								<input type="email" class="regular-text" id="wk_brevo_user" name="wk_brevo_user" value="<?php echo 'brevo' === $method ? esc_attr( $user ) : ''; ?>" autocomplete="off" placeholder="<?php echo esc_attr( $de ? 'deine@email.de' : 'you@example.com' ); ?>" />
+								<p class="description"><?php echo esc_html( $de ? 'Die E-Mail-Adresse, mit der du dich bei Brevo anmeldest.' : 'The email address you use to log in to Brevo' ); ?></p>
+							</td>
+						</tr>
 						<tr><th><label for="wk_brevo_pass"><?php echo esc_html( $de ? 'SMTP-Schlüssel' : 'SMTP key' ); ?></label></th><td><input type="password" class="regular-text" id="wk_brevo_pass" name="wk_brevo_pass" value="" autocomplete="new-password" placeholder="<?php echo 'brevo' === $method ? esc_attr( $pass_ph ) : ''; ?>" /></td></tr>
-						<tr><th><label for="wk_brevo_from_email"><?php echo esc_html( $de ? 'Absender-E-Mail' : 'From email' ); ?></label></th><td><input type="email" class="regular-text" id="wk_brevo_from_email" name="wk_brevo_from_email" value="<?php echo 'brevo' === $method ? esc_attr( $from_email ) : ''; ?>" /></td></tr>
+						<tr>
+							<th><label for="wk_brevo_from_email"><?php echo esc_html( $de ? 'Absender-E-Mail' : 'From email' ); ?></label></th>
+							<td>
+								<input type="email" class="regular-text" id="wk_brevo_from_email" name="wk_brevo_from_email" value="<?php echo 'brevo' === $method ? esc_attr( $from_email ) : ''; ?>" />
+								<p class="description"><?php echo esc_html( $de ? 'Die Adresse, die Empfänger als Absender sehen – muss in Brevo unter „Absender“ verifiziert sein. Kann von der Brevo-Konto-E-Mail abweichen.' : 'The address recipients see as the sender – must be verified in Brevo under “Senders”. Can differ from your Brevo account email.' ); ?></p>
+							</td>
+						</tr>
 						<tr><th><label for="wk_brevo_from_name"><?php echo esc_html( $de ? 'Absender-Name' : 'From name' ); ?></label></th><td><input type="text" class="regular-text" id="wk_brevo_from_name" name="wk_brevo_from_name" value="<?php echo 'brevo' === $method ? esc_attr( $from_name ) : ''; ?>" /></td></tr>
 					</table>
 					<p class="description"><?php printf( $de ? 'Automatisch gesetzt: %s' : 'Auto-set: %s', '<code>' . esc_html( $brevo_sum ) . '</code>' ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?></p>

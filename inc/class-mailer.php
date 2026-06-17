@@ -45,6 +45,23 @@ class WK_Mailer {
 	}
 
 	/**
+	 * Whether SMTP credentials are saved and ready for form delivery.
+	 *
+	 * @return bool
+	 */
+	public static function smtp_configured() {
+		if ( ! self::smtp_enabled() || 'none' === self::get_method() ) {
+			return false;
+		}
+
+		$host = trim( (string) get_option( self::OPT_SMTP_HOST, '' ) );
+		$pass = trim( (string) get_option( self::OPT_SMTP_PASS, '' ) );
+		$from = trim( (string) get_option( self::OPT_SMTP_FROM_MAIL, '' ) );
+
+		return '' !== $host && '' !== $pass && '' !== $from && is_email( $from );
+	}
+
+	/**
 	 * Resolve the recipient address (falls back to the site admin email).
 	 *
 	 * @return string

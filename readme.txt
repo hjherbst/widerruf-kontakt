@@ -4,7 +4,7 @@ Tags: widerruf, widerrufsformular, kontaktformular, withdrawal, contact form, DS
 Requires at least: 6.3
 Tested up to: 6.8
 Requires PHP: 7.4
-Stable tag: 1.0.0
+Stable tag: 1.1.0
 License: GPL-2.0-or-later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -50,9 +50,16 @@ Brevo (ehemals Sendinblue) ist die empfohlene Option – kostenlos für bis zu 3
 Ja. Die Plugins verwenden unterschiedliche Prefixe und Datenbank-Optionen und laufen konfliktfrei nebeneinander.
 
 = Ist das Plugin rechtssicher? =
-Das Plugin stellt das technische Werkzeug bereit. Widerrufsbelehrung, AGB und die konkrete rechtliche Umsetzung sind mit einem Anwalt oder einem Rechtsdienst (z. B. IT-Recht Kanzlei, e-recht24) abzustimmen.
+Das Plugin stellt das technische Werkzeug bereit. Widerrufsbelehrung, AGB und die konkrete rechtliche Umsetzung sind mit einem Anwalt abzustimmen.
 
 == Changelog ==
+
+= 1.1.0 =
+* Block-Breite (weit/voll) wird im Frontend korrekt übernommen
+* Schnellstart legt schlankes Seiten-Pattern an (Überschrift + Formular)
+* Hilfetexte unter Formularfeldern entfernt
+* Admin-Anleitung überarbeitet; SMTP-Warnbanner wenn Versand nicht eingerichtet
+* Brevo-Felder klarer beschriftet (Konto-E-Mail vs. Absender)
 
 = 1.0.0 =
 * Erstveröffentlichung

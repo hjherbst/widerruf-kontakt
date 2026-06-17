@@ -50,13 +50,6 @@
 	color: inherit;
 }
 
-/* Help text below a field */
-.wk-rf-help {
-	font-size: 0.8em;
-	line-height: 1.4;
-	color: var(--wk-rf-muted);
-}
-
 .wk-revocation-form input[type="text"],
 .wk-revocation-form input[type="email"],
 .wk-revocation-form input[type="date"],

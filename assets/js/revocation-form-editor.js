@@ -25,10 +25,6 @@
 		? [ 'Widerruf', 'Widerrufsformular', 'Rückgabe', 'Vertrag' ]
 		: [ 'Withdrawal', 'Revocation', 'Return', 'Contract' ];
 
-	function help( text ) {
-		return el( 'span', { className: 'wk-rf-help' }, text );
-	}
-
 	function Edit( props ) {
 		var a = props.attributes;
 		var set = props.setAttributes;
@@ -154,14 +150,12 @@
 		}
 		topFields.push( el( 'p', { className: 'wk-rf-field', key: 'email' },
 			el( 'label', {}, i18n.email, ' ', reqMark ),
-			el( 'input', { type: 'email', disabled: true } ),
-			help( i18n.emailHelp )
+			el( 'input', { type: 'email', disabled: true } )
 		) );
 		if ( a.showOrderNumber ) {
 			topFields.push( el( 'p', { className: 'wk-rf-field', key: 'order' },
 				el( 'label', {}, i18n.orderNumber, a.orderNumberRequired && reqMark ),
-				el( 'input', { type: 'text', disabled: true } ),
-				help( i18n.orderNumberHelp )
+				el( 'input', { type: 'text', disabled: true } )
 			) );
 		}
 
@@ -180,8 +174,7 @@
 			el( 'div', { className: 'wk-rf-row' },
 				el( 'p', { className: 'wk-rf-field' },
 					el( 'label', {}, itemsLabel ),
-					el( 'textarea', { rows: 3, disabled: true } ),
-					help( i18n.itemsHelp )
+					el( 'textarea', { rows: 3, disabled: true } )
 				)
 			),
 			a.showAddress && el( 'div', { className: 'wk-rf-row' },
@@ -193,8 +186,7 @@
 			a.showReason && el( 'div', { className: 'wk-rf-row' },
 				el( 'p', { className: 'wk-rf-field' },
 					el( 'label', {}, i18n.reason ),
-					el( 'textarea', { rows: 4, disabled: true } ),
-					help( i18n.reasonHelp )
+					el( 'textarea', { rows: 4, disabled: true } )
 				)
 			),
 			a.showConsent && el( 'div', { className: 'wk-rf-row wk-rf-consent' },

@@ -4,6 +4,15 @@ All notable changes to this project are documented here.
 Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 versioning follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.2.1] – 2026-06-19
+
+### Geändert
+- Eingangsbestätigung: Betreff, Text und Absendername mit echter Standardvorlage vorausgefüllt (frei editierbar)
+- Anrede-Umschaltung (Du/Sie) tauscht Standardtexte live, behält eigene Anpassungen
+- Hinweis „Wirksam durch Speichern" neben der Anrede-Auswahl
+- Schnellstart: keine doppelten Widerrufsseiten mehr – bei vorhandener Seite Links zum Bearbeiten/Ansehen
+- Admin-Anleitung: Emojis entfernt, doppelter Abschnitt „Eingangsbestätigung anpassen" entfernt
+
 ## [1.2.0] – 2026-06-19
 
 ### Neu

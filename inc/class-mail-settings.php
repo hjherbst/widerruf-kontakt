@@ -198,8 +198,21 @@ class WK_Mail_Settings {
 		$confirm    = self::get_confirmation_settings();
 		$lang       = $de ? 'de' : 'en';
 		$cs         = WK_Revocation_Form::strings( $lang );
-		$body_ph    = ( 'informal' === $confirm['tone'] && isset( $cs['confirm_body_du'] ) ) ? $cs['confirm_body_du'] : $cs['confirm_body'];
-		$subject_ph = ( 'informal' === $confirm['tone'] && isset( $cs['confirm_subject_du'] ) ) ? $cs['confirm_subject_du'] : $cs['confirm_subject'];
+		$site_name  = wp_specialchars_decode( get_bloginfo( 'name' ), ENT_QUOTES );
+		// Pre-fill the confirmation fields with real, editable default values so the
+		// user can adjust the wording without retyping everything from scratch.
+		$default_body    = ( 'informal' === $confirm['tone'] && isset( $cs['confirm_body_du'] ) ) ? $cs['confirm_body_du'] : $cs['confirm_body'];
+		$default_subject = ( 'informal' === $confirm['tone'] && isset( $cs['confirm_subject_du'] ) ) ? $cs['confirm_subject_du'] : $cs['confirm_subject'];
+		$body_val        = '' !== $confirm['body'] ? $confirm['body'] : $default_body;
+		$subject_val     = '' !== $confirm['subject'] ? $confirm['subject'] : $default_subject;
+		$sender_val      = '' !== $confirm['sender_name'] ? $confirm['sender_name'] : $site_name;
+		$tone_defaults   = array(
+			'formal'   => array( 'subject' => $cs['confirm_subject'], 'body' => $cs['confirm_body'] ),
+			'informal' => array(
+				'subject' => isset( $cs['confirm_subject_du'] ) ? $cs['confirm_subject_du'] : $cs['confirm_subject'],
+				'body'    => isset( $cs['confirm_body_du'] ) ? $cs['confirm_body_du'] : $cs['confirm_body'],
+			),
+		);
 		$display    = ( 'none' === $method ) ? 'brevo' : $method;
 		$brevo_url  = $de
 			? 'https://help.brevo.com/hc/de/articles/209467485'
@@ -230,8 +243,8 @@ class WK_Mail_Settings {
 
 				<h2><?php echo esc_html( $de ? 'Eingangsbestätigung an Kund:innen' : 'Confirmation email to customers' ); ?></h2>
 				<p class="description" style="max-width:640px;margin-bottom:1rem;"><?php echo esc_html( $de
-					? 'Diese E-Mail wird automatisch und unverzüglich nach dem Absenden an den Kunden bzw. die Kundin versendet und enthält Datum und Uhrzeit des Eingangs. Felder leer lassen, um die Standardvorlage zu verwenden.'
-					: 'This email is sent automatically and immediately to the customer after submission and includes the exact date and time of receipt. Leave fields empty to use the default template.' ); ?></p>
+					? 'Diese E-Mail wird automatisch und unverzüglich nach dem Absenden an den Kunden bzw. die Kundin versendet und enthält Datum und Uhrzeit des Eingangs. Die Felder sind mit der Standardvorlage vorausgefüllt und können frei angepasst werden.'
+					: 'This email is sent automatically and immediately to the customer after submission and includes the exact date and time of receipt. The fields are pre-filled with the default template and can be freely customised.' ); ?></p>
 				<table class="form-table" role="presentation">
 					<tr>
 						<th><label for="wk_confirm_tone"><?php echo esc_html( $de ? 'Anrede' : 'Salutation' ); ?></label></th>
@@ -240,34 +253,56 @@ class WK_Mail_Settings {
 								<option value="formal" <?php selected( $confirm['tone'], 'formal' ); ?>><?php echo esc_html( $de ? 'Sie (formell)' : 'Formal' ); ?></option>
 								<option value="informal" <?php selected( $confirm['tone'], 'informal' ); ?>><?php echo esc_html( $de ? 'Du (informell)' : 'Informal' ); ?></option>
 							</select>
-							<p class="description"><?php echo esc_html( $de ? 'Bestimmt die Standardvorlage, wenn unten keine eigenen Texte hinterlegt sind.' : 'Sets the default template when no custom texts are provided below.' ); ?></p>
+							<em style="margin-left:10px;color:#646970;"><?php echo esc_html( $de ? 'Wirksam durch Speichern' : 'Applied on save' ); ?></em>
+							<p class="description"><?php echo esc_html( $de ? 'Bestimmt die Standardvorlage. Beim Speichern werden die unten stehenden Felder, sofern leer, mit der passenden Vorlage befüllt.' : 'Sets the default template. On save, the fields below are filled with the matching template if left empty.' ); ?></p>
 						</td>
 					</tr>
 					<tr>
 						<th><label for="wk_confirm_sender"><?php echo esc_html( $de ? 'Absendername in Signatur' : 'Sender name in signature' ); ?></label></th>
 						<td>
-							<input type="text" class="regular-text" id="wk_confirm_sender" name="<?php echo esc_attr( self::OPT_CONFIRM_SENDER ); ?>" value="<?php echo esc_attr( $confirm['sender_name'] ); ?>" placeholder="<?php echo esc_attr( wp_specialchars_decode( get_bloginfo( 'name' ), ENT_QUOTES ) ); ?>" />
-							<p class="description"><?php echo esc_html( $de ? 'Erscheint im Platzhalter {sender_name}. Leer = Websitename.' : 'Used for the {sender_name} placeholder. Empty = site name.' ); ?></p>
+							<input type="text" class="regular-text" id="wk_confirm_sender" name="<?php echo esc_attr( self::OPT_CONFIRM_SENDER ); ?>" value="<?php echo esc_attr( $sender_val ); ?>" placeholder="<?php echo esc_attr( $site_name ); ?>" />
+							<p class="description"><?php echo esc_html( $de ? 'Erscheint im Platzhalter {sender_name}. Vorausgefüllt mit dem Websitenamen.' : 'Used for the {sender_name} placeholder. Pre-filled with the site name.' ); ?></p>
 						</td>
 					</tr>
 					<tr>
 						<th><label for="wk_confirm_subject"><?php echo esc_html( $de ? 'Betreff' : 'Subject' ); ?></label></th>
 						<td>
-							<input type="text" class="large-text" id="wk_confirm_subject" name="<?php echo esc_attr( self::OPT_CONFIRM_SUBJECT ); ?>" value="<?php echo esc_attr( $confirm['subject'] ); ?>" placeholder="<?php echo esc_attr( $subject_ph ); ?>" />
-							<p class="description"><?php echo esc_html( $de ? 'Leer = Standard je nach Anrede. Platzhalter {site_name} möglich.' : 'Empty = default based on salutation. {site_name} placeholder allowed.' ); ?></p>
+							<input type="text" class="large-text" id="wk_confirm_subject" name="<?php echo esc_attr( self::OPT_CONFIRM_SUBJECT ); ?>" value="<?php echo esc_attr( $subject_val ); ?>" placeholder="<?php echo esc_attr( $default_subject ); ?>" />
+							<p class="description"><?php echo esc_html( $de ? 'Vorausgefüllt mit der Standardvorlage. Platzhalter {site_name} möglich.' : 'Pre-filled with the default template. {site_name} placeholder allowed.' ); ?></p>
 						</td>
 					</tr>
 					<tr>
 						<th><label for="wk_confirm_body"><?php echo esc_html( $de ? 'Text der E-Mail' : 'Email body' ); ?></label></th>
 						<td>
-							<textarea class="large-text code" id="wk_confirm_body" name="<?php echo esc_attr( self::OPT_CONFIRM_BODY ); ?>" rows="12" placeholder="<?php echo esc_attr( $body_ph ); ?>"><?php echo esc_textarea( $confirm['body'] ); ?></textarea>
-							<p class="description"><?php echo esc_html( $de ? 'Leer = Standardvorlage. Verfügbare Platzhalter:' : 'Empty = default template. Available placeholders:' ); ?></p>
+							<textarea class="large-text code" id="wk_confirm_body" name="<?php echo esc_attr( self::OPT_CONFIRM_BODY ); ?>" rows="14"><?php echo esc_textarea( $body_val ); ?></textarea>
+							<p class="description"><?php echo esc_html( $de ? 'Vorausgefüllt mit der Standardvorlage – frei editierbar. Verfügbare Platzhalter:' : 'Pre-filled with the default template – freely editable. Available placeholders:' ); ?></p>
 							<p class="description" style="font-family:monospace;line-height:1.8;">
 								<code>{received_at}</code> <code>{first_name}</code> <code>{name}</code> <code>{email}</code> <code>{order_reference}</code> <code>{order_number}</code> <code>{items}</code> <code>{order_date}</code> <code>{received_date}</code> <code>{address}</code> <code>{reason}</code> <code>{declaration}</code> <code>{sender_name}</code> <code>{site_name}</code>
 							</p>
 						</td>
 					</tr>
 				</table>
+				<script>
+				( function() {
+					var sel  = document.getElementById( 'wk_confirm_tone' );
+					var subj = document.getElementById( 'wk_confirm_subject' );
+					var body = document.getElementById( 'wk_confirm_body' );
+					if ( ! sel || ! subj || ! body ) { return; }
+					var defaults = <?php echo wp_json_encode( $tone_defaults ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>;
+					var known = { subject: {}, body: {} };
+					Object.keys( defaults ).forEach( function( k ) {
+						known.subject[ defaults[ k ].subject ] = 1;
+						known.body[ defaults[ k ].body ] = 1;
+					} );
+					// On tone change, swap the still-default texts; keep manual edits.
+					sel.addEventListener( 'change', function() {
+						var d = defaults[ sel.value ];
+						if ( ! d ) { return; }
+						if ( '' === subj.value.trim() || known.subject[ subj.value ] ) { subj.value = d.subject; }
+						if ( '' === body.value.trim() || known.body[ body.value ] ) { body.value = d.body; }
+					} );
+				} )();
+				</script>
 
 				<h2><?php echo esc_html( $de ? 'Versandweg einrichten' : 'Configure sending' ); ?></h2>
 				<p class="description" style="max-width:640px;margin-bottom:1rem;"><?php echo esc_html( $de ? 'Damit Formulare zuverlässig ankommen, verbinde ein echtes E-Mail-Postfach oder einen Versanddienst wie Brevo.' : 'For reliable delivery, connect a real email mailbox or a sending service like Brevo.' ); ?></p>

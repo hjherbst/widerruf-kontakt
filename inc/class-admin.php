@@ -15,6 +15,8 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 class WK_Admin {
 
+	const OPT_PAGE_ID = 'wk_revocation_page_id';
+
 	public function init() {
 		add_action( 'admin_menu', array( $this, 'register_menu' ) );
 		add_action( 'admin_post_wk_create_revocation_page', array( $this, 'handle_create_page' ) );
@@ -46,23 +48,49 @@ class WK_Admin {
 	// "Create withdrawal page" handler
 	// -------------------------------------------------------------------------
 
+	/**
+	 * Returns the existing withdrawal page (or null) using a stored ID first,
+	 * then falling back to the known slugs. Trashed pages are ignored.
+	 *
+	 * @return WP_Post|null
+	 */
+	public function get_existing_page() {
+		$stored_id = (int) get_option( self::OPT_PAGE_ID, 0 );
+		if ( $stored_id > 0 ) {
+			$post = get_post( $stored_id );
+			if ( $post instanceof WP_Post && 'page' === $post->post_type && 'trash' !== $post->post_status ) {
+				return $post;
+			}
+		}
+
+		foreach ( array( 'widerruf', 'withdrawal' ) as $slug ) {
+			$post = get_page_by_path( $slug );
+			if ( $post instanceof WP_Post && 'trash' !== $post->post_status ) {
+				update_option( self::OPT_PAGE_ID, $post->ID );
+				return $post;
+			}
+		}
+
+		return null;
+	}
+
 	public function handle_create_page() {
 		if ( ! current_user_can( 'manage_options' ) ) {
 			wp_die( 'Unauthorised' );
 		}
 		check_admin_referer( 'wk_create_revocation_page' );
 
+		// If a page already exists, link to it instead of creating a duplicate.
+		$existing = $this->get_existing_page();
+		if ( $existing ) {
+			wp_safe_redirect( get_edit_post_link( $existing->ID, 'raw' ) );
+			exit;
+		}
+
 		$de      = wk_is_de();
 		$title   = $de ? 'Widerruf' : 'Right of Withdrawal';
 		$slug    = $de ? 'widerruf' : 'withdrawal';
 		$content = $this->build_page_content( $de );
-
-		$existing = get_page_by_path( $slug );
-		if ( $existing ) {
-			$redirect = admin_url( 'admin.php?page=widerruf-kontakt&wk_notice=page_exists&page_id=' . $existing->ID );
-			wp_safe_redirect( esc_url_raw( $redirect ) );
-			exit;
-		}
 
 		$page_id = wp_insert_post( array(
 			'post_title'   => $title,
@@ -77,6 +105,7 @@ class WK_Admin {
 			exit;
 		}
 
+		update_option( self::OPT_PAGE_ID, (int) $page_id );
 		wp_safe_redirect( get_edit_post_link( $page_id, 'raw' ) );
 		exit;
 	}
@@ -194,20 +223,45 @@ class WK_Admin {
 
 			<?php // Quick-start CTA. ?>
 			<div class="wk-guide-cta">
-				<h2><?php echo esc_html( $de ? '⚡ Schnellstart' : '⚡ Quick start' ); ?></h2>
-				<p><?php echo esc_html( $de
-					? 'Klicke auf den Button, um sofort eine Entwurfsseite mit dem Widerrufsformular und dem gesetzlich empfohlenen Mustertext anzulegen.'
-					: 'Click the button to immediately create a draft page with the withdrawal form and the legally recommended model text.' ); ?></p>
-				<form method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>">
-					<input type="hidden" name="action" value="wk_create_revocation_page" />
-					<?php wp_nonce_field( 'wk_create_revocation_page' ); ?>
-					<button type="submit" class="button button-primary button-hero">
-						<?php echo esc_html( $de ? '📄 Widerrufsseite erstellen' : '📄 Create withdrawal page' ); ?>
-					</button>
-				</form>
-				<p class="description"><?php echo esc_html( $de
-					? 'Es wird ein Entwurf angelegt – nichts wird sofort veröffentlicht.'
-					: 'A draft is created – nothing will be published immediately.' ); ?></p>
+				<h2><?php echo esc_html( $de ? 'Schnellstart' : 'Quick start' ); ?></h2>
+				<?php
+				$existing_page = $this->get_existing_page();
+				if ( $existing_page ) :
+					$edit_url   = get_edit_post_link( $existing_page->ID );
+					$view_url   = get_permalink( $existing_page->ID );
+					$is_draft   = 'draft' === $existing_page->post_status;
+					?>
+					<p><?php echo esc_html( $de
+						? 'Die Widerrufsseite wurde bereits angelegt. Du kannst sie direkt bearbeiten oder ansehen.'
+						: 'The withdrawal page already exists. You can edit or view it directly.' ); ?></p>
+					<p>
+						<a href="<?php echo esc_url( $edit_url ); ?>" class="button button-primary button-hero">
+							<?php echo esc_html( $de ? 'Widerrufsseite bearbeiten' : 'Edit withdrawal page' ); ?>
+						</a>
+						<?php if ( $view_url ) : ?>
+							<a href="<?php echo esc_url( $view_url ); ?>" class="button button-hero" target="_blank" rel="noopener noreferrer" style="margin-left:8px;">
+								<?php echo esc_html( $de ? 'Seite ansehen' : 'View page' ); ?>
+							</a>
+						<?php endif; ?>
+					</p>
+					<p class="description"><?php echo esc_html( $de
+						? ( $is_draft ? 'Status: Entwurf – noch nicht veröffentlicht.' : 'Status: veröffentlicht.' )
+						: ( $is_draft ? 'Status: draft – not published yet.' : 'Status: published.' ) ); ?></p>
+				<?php else : ?>
+					<p><?php echo esc_html( $de
+						? 'Klicke auf den Button, um sofort eine Entwurfsseite mit dem Widerrufsformular und dem gesetzlich empfohlenen Mustertext anzulegen.'
+						: 'Click the button to immediately create a draft page with the withdrawal form and the legally recommended model text.' ); ?></p>
+					<form method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>">
+						<input type="hidden" name="action" value="wk_create_revocation_page" />
+						<?php wp_nonce_field( 'wk_create_revocation_page' ); ?>
+						<button type="submit" class="button button-primary button-hero">
+							<?php echo esc_html( $de ? 'Widerrufsseite erstellen' : 'Create withdrawal page' ); ?>
+						</button>
+					</form>
+					<p class="description"><?php echo esc_html( $de
+						? 'Es wird ein Entwurf angelegt – nichts wird sofort veröffentlicht.'
+						: 'A draft is created – nothing will be published immediately.' ); ?></p>
+				<?php endif; ?>
 			</div>
 
 			<?php // Step-by-step guide. ?>
@@ -262,43 +316,6 @@ class WK_Admin {
 					<li><?php echo esc_html( $de ? 'Spam-Schutz: Honeypot + IP-Rate-Limit sind aktiv.' : 'Spam protection: honeypot + IP rate limit are active.' ); ?></li>
 					<li><?php echo esc_html( $de ? 'Das Kontaktformular-Block ist ebenfalls verfügbar (Block „Kontaktformular" im Editor suchen).' : 'The contact form block is also available (search for "Contact Form" in the editor).' ); ?></li>
 				</ul>
-			</div>
-
-			<div class="wk-guide-notes">
-				<h2><?php echo esc_html( $de ? 'Eingangsbestätigung anpassen' : 'Customising the confirmation email' ); ?></h2>
-				<p><?php
-				$mail_url2 = admin_url( 'admin.php?page=widerruf-kontakt-mail' );
-				echo wp_kses(
-					$de
-						? sprintf( 'Betreff, Text, Anrede (Du/Sie) und Absendername der Bestätigungs-E-Mail werden zentral unter <a href="%s">E-Mail-Versand</a> festgelegt. Feldbezeichnungen lassen sich pro Block im Inspector unter „Feldbezeichnungen" anpassen.', esc_url( $mail_url2 ) )
-						: sprintf( 'Subject, body, salutation (formal/informal) and sender name of the confirmation email are managed centrally under <a href="%s">Email delivery</a>. Field labels can be customised per block in the inspector under "Field Labels".', esc_url( $mail_url2 ) ),
-					array( 'a' => array( 'href' => array() ) )
-				);
-				?>
-				</p>
-				<p><strong><?php echo esc_html( $de ? 'Verfügbare Platzhalter:' : 'Available placeholders:' ); ?></strong></p>
-				<table class="widefat striped" style="max-width:700px;margin-bottom:12px;">
-					<thead><tr>
-						<th><?php echo esc_html( $de ? 'Platzhalter' : 'Placeholder' ); ?></th>
-						<th><?php echo esc_html( $de ? 'Inhalt' : 'Content' ); ?></th>
-					</tr></thead>
-					<tbody>
-						<tr><td><code>{received_at}</code></td><td><?php echo esc_html( $de ? 'Datum und Uhrzeit des Eingangs (Serverzeit)' : 'Date and time of receipt (server time)' ); ?></td></tr>
-						<tr><td><code>{first_name}</code></td><td><?php echo esc_html( $de ? 'Vorname (erstes Wort des Namens)' : 'First name (first word of name)' ); ?></td></tr>
-						<tr><td><code>{name}</code></td><td><?php echo esc_html( $de ? 'Vollständiger Name' : 'Full name' ); ?></td></tr>
-						<tr><td><code>{email}</code></td><td><?php echo esc_html( $de ? 'E-Mail-Adresse' : 'Email address' ); ?></td></tr>
-						<tr><td><code>{order_reference}</code></td><td><?php echo esc_html( $de ? 'Referenznummer oder Artikel/Leistung (was ausgefüllt)' : 'Reference number or items/service (whichever is filled)' ); ?></td></tr>
-						<tr><td><code>{order_number}</code></td><td><?php echo esc_html( $de ? 'Referenz-/Bestellnummer' : 'Order/reference number' ); ?></td></tr>
-						<tr><td><code>{items}</code></td><td><?php echo esc_html( $de ? 'Widerrufene Artikel/Leistung' : 'Withdrawn items/service' ); ?></td></tr>
-						<tr><td><code>{order_date}</code></td><td><?php echo esc_html( $de ? 'Bestellt am' : 'Order date' ); ?></td></tr>
-						<tr><td><code>{received_date}</code></td><td><?php echo esc_html( $de ? 'Erhalten am (Kundeneingabe)' : 'Received on (customer input)' ); ?></td></tr>
-						<tr><td><code>{address}</code></td><td><?php echo esc_html( $de ? 'Anschrift' : 'Address' ); ?></td></tr>
-						<tr><td><code>{reason}</code></td><td><?php echo esc_html( $de ? 'Widerrufsgrund' : 'Reason for withdrawal' ); ?></td></tr>
-						<tr><td><code>{declaration}</code></td><td><?php echo esc_html( $de ? 'Vollständige Widerrufserklärung (alle Felder, mit aktuellen Bezeichnungen)' : 'Complete withdrawal declaration (all fields with current labels)' ); ?></td></tr>
-						<tr><td><code>{sender_name}</code></td><td><?php echo esc_html( $de ? 'Absendername (aus E-Mail-Versand oder Websitename)' : 'Sender name (from Email delivery or site name)' ); ?></td></tr>
-						<tr><td><code>{site_name}</code></td><td><?php echo esc_html( $de ? 'Websitename' : 'Site name' ); ?></td></tr>
-					</tbody>
-				</table>
 			</div>
 
 			<?php // Disclaimer. ?>

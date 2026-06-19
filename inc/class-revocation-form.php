@@ -47,9 +47,17 @@ class WK_Revocation_Form {
 			'supports'        => array(
 				'align' => array( 'wide', 'full' ),
 			),
-			'attributes'      => array(
-				'align' => array( 'type' => 'string' ),
-			),
+		'attributes'      => array(
+			'align'            => array( 'type' => 'string' ),
+			'labelName'        => array( 'type' => 'string', 'default' => '' ),
+			'labelEmail'       => array( 'type' => 'string', 'default' => '' ),
+			'labelOrderNumber' => array( 'type' => 'string', 'default' => '' ),
+			'labelOrderDate'   => array( 'type' => 'string', 'default' => '' ),
+			'labelReceiptDate' => array( 'type' => 'string', 'default' => '' ),
+			'labelAddress'     => array( 'type' => 'string', 'default' => '' ),
+			'labelReason'      => array( 'type' => 'string', 'default' => '' ),
+			'labelItems'       => array( 'type' => 'string', 'default' => '' ),
+		),
 			'render_callback' => array( $this, 'render_block' ),
 		) );
 	}
@@ -105,9 +113,12 @@ class WK_Revocation_Form {
 			'label_reason'      => 'Grund',
 			'mail_subject'      => 'Neuer Widerruf über {site_name}',
 			'mail_intro'        => 'Hiermit widerruft die unten genannte Person den abgeschlossenen Vertrag über die folgenden Artikel/Leistungen:',
-			'confirm_subject'   => 'Eingangsbestätigung Ihres Widerrufs',
-			'confirm_intro'     => 'Vielen Dank. Wir bestätigen den Eingang Ihres Widerrufs mit den folgenden Angaben:',
-			'confirm_outro'     => 'Diese E-Mail dient als Eingangsbestätigung. Bei Rückfragen antworten Sie einfach auf diese Nachricht.',
+			'confirm_subject'    => 'Eingangsbestätigung Ihres Widerrufs',
+			'confirm_subject_du' => 'Eingangsbestätigung deines Widerrufs',
+			'confirm_intro'      => 'Vielen Dank. Wir bestätigen den Eingang Ihres Widerrufs mit den folgenden Angaben:',
+			'confirm_outro'      => 'Diese E-Mail dient als Eingangsbestätigung. Bei Rückfragen antworten Sie einfach auf diese Nachricht.',
+			'confirm_body'       => "Sehr geehrte(r) {name},\n\nwir bestätigen den Eingang Ihrer Widerrufserklärung.\n\n→ Eingegangen am: {received_at}\n→ Betrifft Vertrag: {order_reference}\n→ Inhalt Ihrer Erklärung:\n{declaration}\n\nWir prüfen jetzt, ob Ihr Widerruf fristgerecht und wirksam ist, und melden uns mit dem nächsten Schritt.\n\nMit freundlichen Grüßen\n{sender_name}",
+			'confirm_body_du'    => "Hallo {first_name},\n\nwir bestätigen den Eingang deiner Widerrufserklärung.\n\n→ Eingegangen am: {received_at}\n→ Betrifft Vertrag: {order_reference}\n→ Inhalt deiner Erklärung:\n{declaration}\n\nWir prüfen jetzt, ob dein Widerruf fristgerecht und wirksam ist, und melden uns mit dem nächsten Schritt.\n\nHerzliche Grüße\n{sender_name}",
 		);
 		$en = array(
 			'name'              => 'Name',
@@ -138,9 +149,10 @@ class WK_Revocation_Form {
 			'label_reason'      => 'Reason',
 			'mail_subject'      => 'New withdrawal via {site_name}',
 			'mail_intro'        => 'The person named below hereby withdraws from the concluded contract for the following items/services:',
-			'confirm_subject'   => 'Confirmation of your withdrawal',
-			'confirm_intro'     => 'Thank you. We confirm receipt of your withdrawal with the following details:',
-			'confirm_outro'     => 'This email serves as your confirmation of receipt. If you have any questions, simply reply to this message.',
+			'confirm_subject'    => 'Confirmation of your withdrawal',
+			'confirm_intro'      => 'Thank you. We confirm receipt of your withdrawal with the following details:',
+			'confirm_outro'      => 'This email serves as your confirmation of receipt. If you have any questions, simply reply to this message.',
+			'confirm_body'       => "Dear {name},\n\nwe confirm receipt of your withdrawal declaration.\n\n→ Received on: {received_at}\n→ Regarding contract: {order_reference}\n→ Content of your declaration:\n{declaration}\n\nWe will now review whether your withdrawal was submitted in time and will get back to you with the next steps.\n\nKind regards,\n{sender_name}",
 		);
 		return 'de' === $lang ? $de : $en;
 	}
@@ -203,8 +215,18 @@ class WK_Revocation_Form {
 			'successHelp'         => $de ? 'Ersetzt das Formular nach dem Absenden. Leer = Standard.' : 'Replaces the form after submission. Empty = default.',
 			'showConsent'         => $de ? 'Checkbox anzeigen' : 'Show checkbox',
 			'consentEditHint'     => $de ? 'Den Checkbox-Text direkt im Block bearbeiten.' : 'Edit the checkbox text directly in the block.',
-			'sendConfirmation'    => $de ? 'Eingangsbestätigung an Absender senden' : 'Send confirmation of receipt to sender',
-			'deliveryNote'        => $de ? 'Empfänger und SMTP werden aus den Plugin-Einstellungen übernommen.' : 'Recipient and SMTP are taken from the plugin settings.',
+			'sendConfirmation'        => $de ? 'Eingangsbestätigung an Absender senden' : 'Send confirmation of receipt to sender',
+			'deliveryNote'            => $de ? 'Empfänger und SMTP werden aus den Plugin-Einstellungen übernommen.' : 'Recipient and SMTP are taken from the plugin settings.',
+			'panelLabels'             => $de ? 'Feldbezeichnungen' : 'Field Labels',
+			'labelFieldHint'          => $de ? 'Leer = Standardbezeichnung' : 'Empty = default label',
+			'labelNameField'          => $de ? 'Bezeichnung: Name' : 'Label: Name',
+			'labelEmailField'         => $de ? 'Bezeichnung: E-Mail' : 'Label: Email',
+			'labelOrderNumberField'   => $de ? 'Bezeichnung: Referenznummer' : 'Label: Reference number',
+			'labelOrderDateField'     => $de ? 'Bezeichnung: Bestelldatum' : 'Label: Order date',
+			'labelReceiptDateField'   => $de ? 'Bezeichnung: Erhalten am' : 'Label: Received date',
+			'labelAddressField'       => $de ? 'Bezeichnung: Anschrift' : 'Label: Address',
+			'labelReasonField'        => $de ? 'Bezeichnung: Grund' : 'Label: Reason',
+			'labelItemsField'         => $de ? 'Bezeichnung: Artikel/Leistung (überschreibt Vertragstyp)' : 'Label: Items/service (overrides contract type)',
 			'name'                => $s['name'],
 			'email'               => $s['email'],
 			'orderNumber'         => $s['order_number'],
@@ -260,7 +282,17 @@ class WK_Revocation_Form {
 		$show_address  = ! empty( $attributes['showAddress'] );
 		$show_reason   = ! isset( $attributes['showReason'] ) || (bool) $attributes['showReason'];
 		$show_consent  = ! isset( $attributes['showConsent'] ) || (bool) $attributes['showConsent'];
-		$items_label   = self::items_label( $lang, $contract_type );
+		$label_name       = self::resolve_label( 'labelName',        $s['name'],        $attributes );
+		$label_email      = self::resolve_label( 'labelEmail',       $s['email'],       $attributes );
+		$label_order      = self::resolve_label( 'labelOrderNumber', $s['order_number'],$attributes );
+		$label_order_date = self::resolve_label( 'labelOrderDate',   $s['order_date'],  $attributes );
+		$label_receipt    = self::resolve_label( 'labelReceiptDate', $s['receipt_date'],$attributes );
+		$label_address    = self::resolve_label( 'labelAddress',     $s['address'],     $attributes );
+		$label_reason     = self::resolve_label( 'labelReason',      $s['reason'],      $attributes );
+		// Custom items label overrides the contractType preset.
+		$items_label = ( isset( $attributes['labelItems'] ) && '' !== trim( $attributes['labelItems'] ) )
+			? $attributes['labelItems']
+			: self::items_label( $lang, $contract_type );
 		$consent_html  = isset( $attributes['consentHtml'] ) && '' !== $attributes['consentHtml']
 			? wp_kses_post( $attributes['consentHtml'] )
 			: esc_html( $s['consent'] );
@@ -298,17 +330,17 @@ class WK_Revocation_Form {
 				<div class="wk-rf-row wk-rf-row--fields" data-cols="<?php echo esc_attr( $cols ); ?>">
 					<?php if ( $show_name ) : ?>
 						<p class="wk-rf-field">
-							<label for="<?php echo $fid; ?>-name"><?php echo esc_html( $s['name'] ); ?><?php echo $name_req ? ' ' . $req_mark : ''; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?></label>
+							<label for="<?php echo $fid; ?>-name"><?php echo esc_html( $label_name ); ?><?php echo $name_req ? ' ' . $req_mark : ''; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?></label>
 							<input type="text" id="<?php echo $fid; ?>-name" name="name" maxlength="<?php echo esc_attr( self::MAX_NAME ); ?>" autocomplete="name" <?php echo $name_req ? 'required aria-required="true"' : ''; ?> />
 						</p>
 					<?php endif; ?>
 					<p class="wk-rf-field">
-						<label for="<?php echo $fid; ?>-email"><?php echo esc_html( $s['email'] ); ?> <?php echo $req_mark; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?></label>
+						<label for="<?php echo $fid; ?>-email"><?php echo esc_html( $label_email ); ?> <?php echo $req_mark; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?></label>
 						<input type="email" id="<?php echo $fid; ?>-email" name="email" autocomplete="email" required aria-required="true" />
 					</p>
 					<?php if ( $show_order ) : ?>
 						<p class="wk-rf-field">
-							<label for="<?php echo $fid; ?>-order"><?php echo esc_html( $s['order_number'] ); ?><?php echo $order_req ? ' ' . $req_mark : ''; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?></label>
+							<label for="<?php echo $fid; ?>-order"><?php echo esc_html( $label_order ); ?><?php echo $order_req ? ' ' . $req_mark : ''; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?></label>
 							<input type="text" id="<?php echo $fid; ?>-order" name="order_number" maxlength="<?php echo esc_attr( self::MAX_ORDER ); ?>" <?php echo $order_req ? 'required aria-required="true"' : ''; ?> />
 						</p>
 					<?php endif; ?>
@@ -316,11 +348,11 @@ class WK_Revocation_Form {
 				<?php if ( $show_dates ) : ?>
 					<div class="wk-rf-row wk-rf-row--fields" data-cols="2">
 						<p class="wk-rf-field">
-							<label for="<?php echo $fid; ?>-order-date"><?php echo esc_html( $s['order_date'] ); ?></label>
+							<label for="<?php echo $fid; ?>-order-date"><?php echo esc_html( $label_order_date ); ?></label>
 							<input type="date" id="<?php echo $fid; ?>-order-date" name="order_date" />
 						</p>
 						<p class="wk-rf-field">
-							<label for="<?php echo $fid; ?>-receipt-date"><?php echo esc_html( $s['receipt_date'] ); ?></label>
+							<label for="<?php echo $fid; ?>-receipt-date"><?php echo esc_html( $label_receipt ); ?></label>
 							<input type="date" id="<?php echo $fid; ?>-receipt-date" name="receipt_date" />
 						</p>
 					</div>
@@ -334,7 +366,7 @@ class WK_Revocation_Form {
 				<?php if ( $show_address ) : ?>
 					<div class="wk-rf-row">
 						<p class="wk-rf-field">
-							<label for="<?php echo $fid; ?>-address"><?php echo esc_html( $s['address'] ); ?></label>
+							<label for="<?php echo $fid; ?>-address"><?php echo esc_html( $label_address ); ?></label>
 							<textarea id="<?php echo $fid; ?>-address" name="address" rows="2" maxlength="<?php echo esc_attr( self::MAX_ADDRESS ); ?>" autocomplete="street-address"></textarea>
 						</p>
 					</div>
@@ -342,7 +374,7 @@ class WK_Revocation_Form {
 				<?php if ( $show_reason ) : ?>
 					<div class="wk-rf-row">
 						<p class="wk-rf-field">
-							<label for="<?php echo $fid; ?>-reason"><?php echo esc_html( $s['reason'] ); ?></label>
+							<label for="<?php echo $fid; ?>-reason"><?php echo esc_html( $label_reason ); ?></label>
 							<textarea id="<?php echo $fid; ?>-reason" name="reason" rows="4" maxlength="<?php echo esc_attr( self::MAX_REASON ); ?>"></textarea>
 						</p>
 					</div>
@@ -366,9 +398,17 @@ class WK_Revocation_Form {
 						</button>
 					</div>
 				</div>
-				<input type="hidden" name="lang" value="<?php echo esc_attr( $lang ); ?>" />
-				<input type="hidden" name="contract_type" value="<?php echo esc_attr( $contract_type ); ?>" />
-				<input type="hidden" name="send_confirmation" value="<?php echo $send_confirm ? '1' : '0'; ?>" />
+			<input type="hidden" name="lang" value="<?php echo esc_attr( $lang ); ?>" />
+			<input type="hidden" name="contract_type" value="<?php echo esc_attr( $contract_type ); ?>" />
+			<input type="hidden" name="send_confirmation" value="<?php echo $send_confirm ? '1' : '0'; ?>" />
+			<input type="hidden" name="wk_label_name" value="<?php echo esc_attr( $label_name ); ?>" />
+			<input type="hidden" name="wk_label_email" value="<?php echo esc_attr( $label_email ); ?>" />
+			<input type="hidden" name="wk_label_order" value="<?php echo esc_attr( $label_order ); ?>" />
+			<input type="hidden" name="wk_label_order_date" value="<?php echo esc_attr( $label_order_date ); ?>" />
+			<input type="hidden" name="wk_label_receipt" value="<?php echo esc_attr( $label_receipt ); ?>" />
+			<input type="hidden" name="wk_label_address" value="<?php echo esc_attr( $label_address ); ?>" />
+			<input type="hidden" name="wk_label_items" value="<?php echo esc_attr( $items_label ); ?>" />
+			<input type="hidden" name="wk_label_reason" value="<?php echo esc_attr( $label_reason ); ?>" />
 			</form>
 		</div>
 		<?php
@@ -449,7 +489,13 @@ class WK_Revocation_Form {
 		$items        = mb_substr( $items, 0, self::MAX_ITEMS );
 		$reason       = mb_substr( $reason, 0, self::MAX_REASON );
 
-		$data = compact( 'name', 'email', 'order_number', 'order_date', 'receipt_date', 'address', 'items', 'reason', 'contract_type', 'lang' );
+		// Server-side receipt timestamp (site timezone via wp_date).
+		$received_at_ts = current_time( 'timestamp' );
+		$received_at    = 'de' === $lang
+			? wp_date( 'd.m.Y, H:i', $received_at_ts ) . ' Uhr'
+			: wp_date( 'F j, Y, g:i a', $received_at_ts );
+
+		$data = compact( 'name', 'email', 'order_number', 'order_date', 'receipt_date', 'address', 'items', 'reason', 'contract_type', 'lang', 'received_at' );
 		$site_name = wp_specialchars_decode( get_bloginfo( 'name' ), ENT_QUOTES );
 		$subject   = str_replace( '{site_name}', $site_name, $s['mail_subject'] );
 		$body      = $this->build_trader_body( $data, $s );
@@ -462,8 +508,46 @@ class WK_Revocation_Form {
 
 		$send_confirm = ! empty( $request->get_param( 'send_confirmation' ) );
 		if ( $send_confirm ) {
-			$confirm_body = $s['confirm_intro'] . "\n\n" . $body . "\n\n" . $s['confirm_outro'];
-			WK_Mailer::send( $email, $s['confirm_subject'], $confirm_body );
+			// Confirmation-email texts are managed centrally in the plugin settings.
+			$settings = WK_Mail_Settings::get_confirmation_settings();
+			$tone     = $settings['tone'];
+
+			// Resolved field labels passed from the block render as hidden fields,
+			// so {declaration} reflects the trader's custom field names.
+			$label_attrs = array(
+				'labelName'        => sanitize_text_field( (string) $request->get_param( 'wk_label_name' ) ),
+				'labelEmail'       => sanitize_text_field( (string) $request->get_param( 'wk_label_email' ) ),
+				'labelOrderNumber' => sanitize_text_field( (string) $request->get_param( 'wk_label_order' ) ),
+				'labelOrderDate'   => sanitize_text_field( (string) $request->get_param( 'wk_label_order_date' ) ),
+				'labelReceiptDate' => sanitize_text_field( (string) $request->get_param( 'wk_label_receipt' ) ),
+				'labelAddress'     => sanitize_text_field( (string) $request->get_param( 'wk_label_address' ) ),
+				'labelItems'       => sanitize_text_field( (string) $request->get_param( 'wk_label_items' ) ),
+				'labelReason'      => sanitize_text_field( (string) $request->get_param( 'wk_label_reason' ) ),
+				'senderName'       => $settings['sender_name'],
+			);
+
+			// Subject: custom setting → tone default → lang default.
+			if ( '' !== $settings['subject'] ) {
+				$confirm_subject = $settings['subject'];
+			} elseif ( 'informal' === $tone && isset( $s['confirm_subject_du'] ) ) {
+				$confirm_subject = $s['confirm_subject_du'];
+			} else {
+				$confirm_subject = $s['confirm_subject'];
+			}
+
+			// Body: custom setting → tone default.
+			if ( '' !== $settings['body'] ) {
+				$confirm_template = $settings['body'];
+			} elseif ( 'informal' === $tone && isset( $s['confirm_body_du'] ) ) {
+				$confirm_template = $s['confirm_body_du'];
+			} else {
+				$confirm_template = $s['confirm_body'];
+			}
+
+			$site_name       = wp_specialchars_decode( get_bloginfo( 'name' ), ENT_QUOTES );
+			$confirm_subject = str_replace( '{site_name}', $site_name, $confirm_subject );
+			$confirm_body    = self::build_confirmation_body( $data, $s, $confirm_template, $label_attrs );
+			WK_Mailer::send( $email, $confirm_subject, $confirm_body );
 		}
 
 		$this->bump_rate_limit();
@@ -473,6 +557,11 @@ class WK_Revocation_Form {
 	private function build_trader_body( $d, $s ) {
 		$lines       = array( $s['mail_intro'], '' );
 		$items_label = self::items_label( $d['lang'], $d['contract_type'] );
+		// Add server timestamp for the trader's reference.
+		if ( ! empty( $d['received_at'] ) ) {
+			$lines[] = ( 'de' === $d['lang'] ? 'Eingegangen am (Server)' : 'Received on (server)' ) . ': ' . $d['received_at'];
+			$lines[] = '';
+		}
 		$lines[]     = $items_label;
 		$lines[]     = '' !== $d['items'] ? $d['items'] : '— (' . ( 'de' === $d['lang'] ? 'gesamter Vertrag' : 'entire contract' ) . ')';
 		$lines[]     = '';
@@ -484,6 +573,71 @@ class WK_Revocation_Form {
 		if ( '' !== $d['address'] ) { $lines[] = $s['label_address'] . ': ' . $d['address']; }
 		if ( '' !== $d['reason'] ) { $lines[] = ''; $lines[] = $s['label_reason'] . ':'; $lines[] = $d['reason']; }
 		return implode( "\n", $lines );
+	}
+
+	/**
+	 * Returns the resolved label for a field: custom attr → string default.
+	 */
+	private static function resolve_label( $attr_key, $default, $attrs ) {
+		return ( isset( $attrs[ $attr_key ] ) && '' !== trim( (string) $attrs[ $attr_key ] ) )
+			? (string) $attrs[ $attr_key ]
+			: $default;
+	}
+
+	/**
+	 * Builds the structured {declaration} block used in the confirmation email.
+	 * Uses resolved label_attrs so custom field names appear correctly.
+	 */
+	private static function build_declaration( $d, $s, $label_attrs ) {
+		$lines = array();
+		if ( '' !== $d['name'] )         { $lines[] = self::resolve_label( 'labelName',        $s['name'],          $label_attrs ) . ': ' . $d['name']; }
+		$lines[] = self::resolve_label( 'labelEmail',        $s['email'],         $label_attrs ) . ': ' . $d['email'];
+		if ( '' !== $d['order_number'] ) { $lines[] = self::resolve_label( 'labelOrderNumber',  $s['label_order'],       $label_attrs ) . ': ' . $d['order_number']; }
+		if ( '' !== $d['order_date'] )   { $lines[] = self::resolve_label( 'labelOrderDate',    $s['label_order_date'],  $label_attrs ) . ': ' . $d['order_date']; }
+		if ( '' !== $d['receipt_date'] ) { $lines[] = self::resolve_label( 'labelReceiptDate',  $s['label_receipt'],     $label_attrs ) . ': ' . $d['receipt_date']; }
+		if ( '' !== $d['address'] )      { $lines[] = self::resolve_label( 'labelAddress',      $s['address'],           $label_attrs ) . ': ' . $d['address']; }
+		if ( '' !== $d['items'] )        { $lines[] = self::resolve_label( 'labelItems',        $s['label_items'],       $label_attrs ) . ': ' . $d['items']; }
+		if ( '' !== $d['reason'] )       { $lines[] = self::resolve_label( 'labelReason',       $s['label_reason'],      $label_attrs ) . ': ' . $d['reason']; }
+		return implode( "\n", $lines );
+	}
+
+	/**
+	 * Replaces all {placeholder} tokens in $text with values from $data.
+	 */
+	private static function replace_placeholders( $text, $data, $s ) {
+		$name_parts = preg_split( '/\s+/', trim( $data['name'] ), 2 );
+		$first_name = '' !== $data['name'] ? $name_parts[0] : '';
+		$order_ref  = '' !== $data['order_number'] ? $data['order_number'] : $data['items'];
+		$site_name  = wp_specialchars_decode( get_bloginfo( 'name' ), ENT_QUOTES );
+
+		$map = array(
+			'{received_at}'     => $data['received_at'] ?? '',
+			'{first_name}'      => $first_name,
+			'{name}'            => $data['name'],
+			'{email}'           => $data['email'],
+			'{order_number}'    => $data['order_number'],
+			'{order_reference}' => $order_ref,
+			'{items}'           => $data['items'],
+			'{order_date}'      => $data['order_date'],
+			'{received_date}'   => $data['receipt_date'],
+			'{address}'         => $data['address'],
+			'{reason}'          => $data['reason'],
+			'{declaration}'     => $data['declaration'] ?? '',
+			'{site_name}'       => $site_name,
+			'{sender_name}'     => $data['sender_name'] ?? $site_name,
+		);
+		return str_replace( array_keys( $map ), array_values( $map ), $text );
+	}
+
+	/**
+	 * Builds the consumer-facing confirmation email body from a template.
+	 */
+	private static function build_confirmation_body( $data, $s, $template, $label_attrs ) {
+		$data['declaration'] = self::build_declaration( $data, $s, $label_attrs );
+		$data['sender_name'] = ( isset( $label_attrs['senderName'] ) && '' !== trim( $label_attrs['senderName'] ) )
+			? $label_attrs['senderName']
+			: wp_specialchars_decode( get_bloginfo( 'name' ), ENT_QUOTES );
+		return self::replace_placeholders( $template, $data, $s );
 	}
 
 	private function rate_key() {

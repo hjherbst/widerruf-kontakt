@@ -35,10 +35,20 @@
 			}
 		}, [] );
 
-		var blockProps = useBlockProps( { className: 'wk-revocation-form-wrap' } );
-		var reqMark = el( 'span', { className: 'wk-rf-req' }, ' *' );
-		var itemsLabel = itemsLabels[ a.contractType ] || itemsLabels.neutral || '';
-		var cols = 1 + ( a.showName ? 1 : 0 ) + ( a.showOrderNumber ? 1 : 0 );
+	var blockProps = useBlockProps( { className: 'wk-revocation-form-wrap' } );
+	var reqMark = el( 'span', { className: 'wk-rf-req' }, ' *' );
+	// Custom label or fallback to i18n default.
+	var lName    = a.labelName        || i18n.name;
+	var lEmail   = a.labelEmail       || i18n.email;
+	var lOrder   = a.labelOrderNumber || i18n.orderNumber;
+	var lODate   = a.labelOrderDate   || i18n.orderDate;
+	var lRDate   = a.labelReceiptDate || i18n.receiptDate;
+	var lAddress = a.labelAddress     || i18n.address;
+	var lReason  = a.labelReason      || i18n.reason;
+	var itemsLabel = ( a.labelItems && a.labelItems !== '' )
+		? a.labelItems
+		: ( itemsLabels[ a.contractType ] || itemsLabels.neutral || '' );
+	var cols = 1 + ( a.showName ? 1 : 0 ) + ( a.showOrderNumber ? 1 : 0 );
 
 		var inspector = el( InspectorControls, {},
 			el( PanelBody, { title: i18n.panelFields, initialOpen: true },
@@ -129,66 +139,132 @@
 				} ),
 				a.showConsent && el( 'p', { style: { fontSize: '12px', color: '#757575', marginTop: '8px' } }, i18n.consentEditHint )
 			),
-			el( PanelBody, { title: i18n.panelDelivery, initialOpen: false },
-				el( ToggleControl, {
-					label: i18n.sendConfirmation,
-					checked: a.sendConfirmation !== false,
-					onChange: function( v ) { set( { sendConfirmation: v } ); },
-					__nextHasNoMarginBottom: true,
-				} ),
-				el( 'p', { style: { fontSize: '12px', color: '#757575', marginTop: '8px' } }, i18n.deliveryNote )
-			)
-		);
+		el( PanelBody, { title: i18n.panelDelivery, initialOpen: false },
+			el( ToggleControl, {
+				label: i18n.sendConfirmation,
+				checked: a.sendConfirmation !== false,
+				onChange: function( v ) { set( { sendConfirmation: v } ); },
+				__nextHasNoMarginBottom: true,
+			} ),
+			el( 'p', { style: { fontSize: '12px', color: '#757575', marginTop: '8px' } }, i18n.deliveryNote )
+		),
+		el( PanelBody, { title: i18n.panelLabels, initialOpen: false },
+			el( TextControl, {
+				label: i18n.labelNameField,
+				value: a.labelName || '',
+				onChange: function( v ) { set( { labelName: v } ); },
+				placeholder: i18n.name,
+				help: i18n.labelFieldHint,
+				__nextHasNoMarginBottom: true,
+			} ),
+			el( TextControl, {
+				label: i18n.labelEmailField,
+				value: a.labelEmail || '',
+				onChange: function( v ) { set( { labelEmail: v } ); },
+				placeholder: i18n.email,
+				help: i18n.labelFieldHint,
+				__nextHasNoMarginBottom: true,
+			} ),
+			el( TextControl, {
+				label: i18n.labelOrderNumberField,
+				value: a.labelOrderNumber || '',
+				onChange: function( v ) { set( { labelOrderNumber: v } ); },
+				placeholder: i18n.orderNumber,
+				help: i18n.labelFieldHint,
+				__nextHasNoMarginBottom: true,
+			} ),
+			el( TextControl, {
+				label: i18n.labelOrderDateField,
+				value: a.labelOrderDate || '',
+				onChange: function( v ) { set( { labelOrderDate: v } ); },
+				placeholder: i18n.orderDate,
+				help: i18n.labelFieldHint,
+				__nextHasNoMarginBottom: true,
+			} ),
+			el( TextControl, {
+				label: i18n.labelReceiptDateField,
+				value: a.labelReceiptDate || '',
+				onChange: function( v ) { set( { labelReceiptDate: v } ); },
+				placeholder: i18n.receiptDate,
+				help: i18n.labelFieldHint,
+				__nextHasNoMarginBottom: true,
+			} ),
+			el( TextControl, {
+				label: i18n.labelAddressField,
+				value: a.labelAddress || '',
+				onChange: function( v ) { set( { labelAddress: v } ); },
+				placeholder: i18n.address,
+				help: i18n.labelFieldHint,
+				__nextHasNoMarginBottom: true,
+			} ),
+			el( TextControl, {
+				label: i18n.labelReasonField,
+				value: a.labelReason || '',
+				onChange: function( v ) { set( { labelReason: v } ); },
+				placeholder: i18n.reason,
+				help: i18n.labelFieldHint,
+				__nextHasNoMarginBottom: true,
+			} ),
+			el( TextControl, {
+				label: i18n.labelItemsField,
+				value: a.labelItems || '',
+				onChange: function( v ) { set( { labelItems: v } ); },
+				placeholder: itemsLabels[ a.contractType ] || itemsLabels.neutral || '',
+				help: i18n.labelFieldHint,
+				__nextHasNoMarginBottom: true,
+			} )
+		)
+	);
 
 		// Editor preview mirroring the PHP render markup.
-		var topFields = [];
-		if ( a.showName ) {
-			topFields.push( el( 'p', { className: 'wk-rf-field', key: 'name' },
-				el( 'label', {}, i18n.name, a.nameRequired && reqMark ),
-				el( 'input', { type: 'text', disabled: true } )
-			) );
-		}
-		topFields.push( el( 'p', { className: 'wk-rf-field', key: 'email' },
-			el( 'label', {}, i18n.email, ' ', reqMark ),
-			el( 'input', { type: 'email', disabled: true } )
+	var topFields = [];
+	if ( a.showName ) {
+		topFields.push( el( 'p', { className: 'wk-rf-field', key: 'name' },
+			el( 'label', {}, lName, a.nameRequired && reqMark ),
+			el( 'input', { type: 'text', disabled: true } )
 		) );
-		if ( a.showOrderNumber ) {
-			topFields.push( el( 'p', { className: 'wk-rf-field', key: 'order' },
-				el( 'label', {}, i18n.orderNumber, a.orderNumberRequired && reqMark ),
-				el( 'input', { type: 'text', disabled: true } )
-			) );
-		}
+	}
+	topFields.push( el( 'p', { className: 'wk-rf-field', key: 'email' },
+		el( 'label', {}, lEmail, ' ', reqMark ),
+		el( 'input', { type: 'email', disabled: true } )
+	) );
+	if ( a.showOrderNumber ) {
+		topFields.push( el( 'p', { className: 'wk-rf-field', key: 'order' },
+			el( 'label', {}, lOrder, a.orderNumberRequired && reqMark ),
+			el( 'input', { type: 'text', disabled: true } )
+		) );
+	}
 
-		var preview = el( 'div', { className: 'wk-revocation-form' },
-			el( 'div', { className: 'wk-rf-row wk-rf-row--fields', 'data-cols': cols }, topFields ),
-			a.showDates && el( 'div', { className: 'wk-rf-row wk-rf-row--fields', 'data-cols': 2 },
-				el( 'p', { className: 'wk-rf-field' },
-					el( 'label', {}, i18n.orderDate ),
-					el( 'input', { type: 'date', disabled: true } )
-				),
-				el( 'p', { className: 'wk-rf-field' },
-					el( 'label', {}, i18n.receiptDate ),
-					el( 'input', { type: 'date', disabled: true } )
-				)
+	var preview = el( 'div', { className: 'wk-revocation-form' },
+		el( 'div', { className: 'wk-rf-row wk-rf-row--fields', 'data-cols': cols }, topFields ),
+		a.showDates && el( 'div', { className: 'wk-rf-row wk-rf-row--fields', 'data-cols': 2 },
+			el( 'p', { className: 'wk-rf-field' },
+				el( 'label', {}, lODate ),
+				el( 'input', { type: 'date', disabled: true } )
 			),
-			el( 'div', { className: 'wk-rf-row' },
-				el( 'p', { className: 'wk-rf-field' },
-					el( 'label', {}, itemsLabel ),
-					el( 'textarea', { rows: 3, disabled: true } )
-				)
-			),
-			a.showAddress && el( 'div', { className: 'wk-rf-row' },
-				el( 'p', { className: 'wk-rf-field' },
-					el( 'label', {}, i18n.address ),
-					el( 'textarea', { rows: 2, disabled: true } )
-				)
-			),
-			a.showReason && el( 'div', { className: 'wk-rf-row' },
-				el( 'p', { className: 'wk-rf-field' },
-					el( 'label', {}, i18n.reason ),
-					el( 'textarea', { rows: 4, disabled: true } )
-				)
-			),
+			el( 'p', { className: 'wk-rf-field' },
+				el( 'label', {}, lRDate ),
+				el( 'input', { type: 'date', disabled: true } )
+			)
+		),
+		el( 'div', { className: 'wk-rf-row' },
+			el( 'p', { className: 'wk-rf-field' },
+				el( 'label', {}, itemsLabel ),
+				el( 'textarea', { rows: 3, disabled: true } )
+			)
+		),
+		a.showAddress && el( 'div', { className: 'wk-rf-row' },
+			el( 'p', { className: 'wk-rf-field' },
+				el( 'label', {}, lAddress ),
+				el( 'textarea', { rows: 2, disabled: true } )
+			)
+		),
+		a.showReason && el( 'div', { className: 'wk-rf-row' },
+			el( 'p', { className: 'wk-rf-field' },
+				el( 'label', {}, lReason ),
+				el( 'textarea', { rows: 4, disabled: true } )
+			)
+		),
 			a.showConsent && el( 'div', { className: 'wk-rf-row wk-rf-consent' },
 				el( 'label', { className: 'wk-rf-consent-label' },
 					el( 'input', { type: 'checkbox', disabled: true } ),
@@ -243,6 +319,14 @@
 			successMessage:       { type: 'string',  default: '' },
 			sendConfirmation:     { type: 'boolean', default: true },
 			formId:               { type: 'string',  default: '' },
+			labelName:            { type: 'string',  default: '' },
+			labelEmail:           { type: 'string',  default: '' },
+			labelOrderNumber:     { type: 'string',  default: '' },
+			labelOrderDate:       { type: 'string',  default: '' },
+			labelReceiptDate:     { type: 'string',  default: '' },
+			labelAddress:         { type: 'string',  default: '' },
+			labelReason:          { type: 'string',  default: '' },
+			labelItems:           { type: 'string',  default: '' },
 		},
 		edit: Edit,
 		save: function() { return null; },

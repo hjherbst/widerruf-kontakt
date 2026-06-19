@@ -257,11 +257,48 @@ class WK_Admin {
 			<div class="wk-guide-notes">
 				<h2><?php echo esc_html( $de ? 'Wichtige Hinweise' : 'Important notes' ); ?></h2>
 				<ul>
-					<li><?php echo esc_html( $de ? 'Der Absender erhält automatisch eine Eingangsbestätigung per E-Mail.' : 'The sender automatically receives a confirmation of receipt by email.' ); ?></li>
+					<li><?php echo esc_html( $de ? 'Die Eingangsbestätigung an den Absender enthält Datum und Uhrzeit des Eingangs (Serverseitig, Seitenzeitzone).' : 'The confirmation email to the sender includes the exact server-side date and time of receipt.' ); ?></li>
 					<li><?php echo esc_html( $de ? 'Keine Datenbankprotokollierung der Einreichungen (DSGVO-Datensparsamkeit).' : 'No database logging of submissions (GDPR data minimisation).' ); ?></li>
 					<li><?php echo esc_html( $de ? 'Spam-Schutz: Honeypot + IP-Rate-Limit sind aktiv.' : 'Spam protection: honeypot + IP rate limit are active.' ); ?></li>
 					<li><?php echo esc_html( $de ? 'Das Kontaktformular-Block ist ebenfalls verfügbar (Block „Kontaktformular" im Editor suchen).' : 'The contact form block is also available (search for "Contact Form" in the editor).' ); ?></li>
 				</ul>
+			</div>
+
+			<div class="wk-guide-notes">
+				<h2><?php echo esc_html( $de ? 'Eingangsbestätigung anpassen' : 'Customising the confirmation email' ); ?></h2>
+				<p><?php
+				$mail_url2 = admin_url( 'admin.php?page=widerruf-kontakt-mail' );
+				echo wp_kses(
+					$de
+						? sprintf( 'Betreff, Text, Anrede (Du/Sie) und Absendername der Bestätigungs-E-Mail werden zentral unter <a href="%s">E-Mail-Versand</a> festgelegt. Feldbezeichnungen lassen sich pro Block im Inspector unter „Feldbezeichnungen" anpassen.', esc_url( $mail_url2 ) )
+						: sprintf( 'Subject, body, salutation (formal/informal) and sender name of the confirmation email are managed centrally under <a href="%s">Email delivery</a>. Field labels can be customised per block in the inspector under "Field Labels".', esc_url( $mail_url2 ) ),
+					array( 'a' => array( 'href' => array() ) )
+				);
+				?>
+				</p>
+				<p><strong><?php echo esc_html( $de ? 'Verfügbare Platzhalter:' : 'Available placeholders:' ); ?></strong></p>
+				<table class="widefat striped" style="max-width:700px;margin-bottom:12px;">
+					<thead><tr>
+						<th><?php echo esc_html( $de ? 'Platzhalter' : 'Placeholder' ); ?></th>
+						<th><?php echo esc_html( $de ? 'Inhalt' : 'Content' ); ?></th>
+					</tr></thead>
+					<tbody>
+						<tr><td><code>{received_at}</code></td><td><?php echo esc_html( $de ? 'Datum und Uhrzeit des Eingangs (Serverzeit)' : 'Date and time of receipt (server time)' ); ?></td></tr>
+						<tr><td><code>{first_name}</code></td><td><?php echo esc_html( $de ? 'Vorname (erstes Wort des Namens)' : 'First name (first word of name)' ); ?></td></tr>
+						<tr><td><code>{name}</code></td><td><?php echo esc_html( $de ? 'Vollständiger Name' : 'Full name' ); ?></td></tr>
+						<tr><td><code>{email}</code></td><td><?php echo esc_html( $de ? 'E-Mail-Adresse' : 'Email address' ); ?></td></tr>
+						<tr><td><code>{order_reference}</code></td><td><?php echo esc_html( $de ? 'Referenznummer oder Artikel/Leistung (was ausgefüllt)' : 'Reference number or items/service (whichever is filled)' ); ?></td></tr>
+						<tr><td><code>{order_number}</code></td><td><?php echo esc_html( $de ? 'Referenz-/Bestellnummer' : 'Order/reference number' ); ?></td></tr>
+						<tr><td><code>{items}</code></td><td><?php echo esc_html( $de ? 'Widerrufene Artikel/Leistung' : 'Withdrawn items/service' ); ?></td></tr>
+						<tr><td><code>{order_date}</code></td><td><?php echo esc_html( $de ? 'Bestellt am' : 'Order date' ); ?></td></tr>
+						<tr><td><code>{received_date}</code></td><td><?php echo esc_html( $de ? 'Erhalten am (Kundeneingabe)' : 'Received on (customer input)' ); ?></td></tr>
+						<tr><td><code>{address}</code></td><td><?php echo esc_html( $de ? 'Anschrift' : 'Address' ); ?></td></tr>
+						<tr><td><code>{reason}</code></td><td><?php echo esc_html( $de ? 'Widerrufsgrund' : 'Reason for withdrawal' ); ?></td></tr>
+						<tr><td><code>{declaration}</code></td><td><?php echo esc_html( $de ? 'Vollständige Widerrufserklärung (alle Felder, mit aktuellen Bezeichnungen)' : 'Complete withdrawal declaration (all fields with current labels)' ); ?></td></tr>
+						<tr><td><code>{sender_name}</code></td><td><?php echo esc_html( $de ? 'Absendername (aus E-Mail-Versand oder Websitename)' : 'Sender name (from Email delivery or site name)' ); ?></td></tr>
+						<tr><td><code>{site_name}</code></td><td><?php echo esc_html( $de ? 'Websitename' : 'Site name' ); ?></td></tr>
+					</tbody>
+				</table>
 			</div>
 
 			<?php // Disclaimer. ?>

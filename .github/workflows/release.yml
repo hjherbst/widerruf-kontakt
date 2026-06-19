@@ -33,13 +33,27 @@ jobs:
           zip -r widerruf-kontakt.zip widerruf-kontakt
           mv widerruf-kontakt.zip ../
 
+      - name: Extract changelog for this version
+        id: changelog
+        run: |
+          VERSION="${{ steps.get_version.outputs.VERSION }}"
+          # Extract the section between "## [VERSION]" and the next "## [" heading.
+          NOTES=$(awk "/^## \[$VERSION\]/{found=1; next} found && /^## \[/{exit} found{print}" CHANGELOG.md)
+          # Write multi-line output safely via heredoc delimiter.
+          {
+            echo "NOTES<<CHANGELOG_EOF"
+            echo "$NOTES"
+            echo "CHANGELOG_EOF"
+          } >> $GITHUB_OUTPUT
+
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v1
         with:
           name: Widerruf & Kontakt v${{ steps.get_version.outputs.VERSION }}
           body: |
-            ## Widerruf & Kontakt v${{ steps.get_version.outputs.VERSION }}
+            ${{ steps.changelog.outputs.NOTES }}
 
+            ---
             ### Installation
             1. ZIP herunterladen
             2. WordPress Admin → Plugins → Installieren → Plugin hochladen

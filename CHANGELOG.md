@@ -4,6 +4,21 @@ All notable changes to this project are documented here.
 Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 versioning follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.2.0] – 2026-06-19
+
+### Neu
+- Rechtssichere Eingangsbestätigung: Datum und Uhrzeit des Eingangs werden serverseitig (Site-Zeitzone) erfasst und in der Kunden-E-Mail ausgegeben
+- Platzhalter-System für die Kunden-Mail: `{received_at}`, `{first_name}`, `{name}`, `{email}`, `{order_reference}`, `{order_number}`, `{items}`, `{order_date}`, `{received_date}`, `{address}`, `{reason}`, `{declaration}`, `{sender_name}`, `{site_name}`
+- `{declaration}` liefert eine strukturierte Zusammenfassung aller ausgefüllten Felder mit aktuellen Feldbezeichnungen
+- Standard-Vorlagen für Kunden-Mail: DE formell (Sie), DE informell (Du, angelehnt an Anwältin-Vorlage), EN
+- Anrede (Du/Sie), Betreff, Mailtext und Absendername zentral konfigurierbar unter **E-Mail-Versand → Eingangsbestätigung**
+- Feldbezeichnungen individuell überschreibbar pro Block (Inspector → Feldbezeichnungen), z. B. „Rechnungsnummer" statt „Bestell-/Buchungsnummer"
+- Händler-Mail enthält ebenfalls den serverseitigen Eingangszeitstempel
+
+### Geändert
+- Eingangsbestätigung an Kunden nutzt eigene Vorlage statt der Händler-Mail (falsche Perspektive behoben)
+- Admin-Anleitung mit Platzhalter-Referenztabelle und Link auf E-Mail-Versand erweitert
+
 ## [1.1.1] – 2026-06-17
 
 - Fix Brevo field copy: SMTP login is the address from “Your SMTP settings” (e.g. name@smtp-brevo.com), not the Brevo sign-in email

@@ -18,6 +18,11 @@ class WK_Mail_Settings {
 	const OPT_TEST_STATUS  = 'wk_cf_test_status';
 	const OPT_TEST_MESSAGE = 'wk_cf_test_message';
 
+	const OPT_CONFIRM_TONE    = 'wk_confirm_tone';
+	const OPT_CONFIRM_SUBJECT = 'wk_confirm_subject';
+	const OPT_CONFIRM_BODY    = 'wk_confirm_body';
+	const OPT_CONFIRM_SENDER  = 'wk_confirm_sender_name';
+
 	public function init() {
 		add_action( 'admin_menu', array( $this, 'add_submenu' ) );
 		add_action( 'admin_init', array( $this, 'register_settings' ) );
@@ -43,6 +48,28 @@ class WK_Mail_Settings {
 		register_setting( self::SETTINGS_GROUP, $m::OPT_SUBJECT,   array( 'type' => 'string', 'sanitize_callback' => 'sanitize_text_field' ) );
 		register_setting( self::SETTINGS_GROUP, $m::OPT_MAIL_PRESET, array( 'type' => 'string', 'sanitize_callback' => array( $this, 'sanitize_preset' ), 'default' => 'ionos' ) );
 		register_setting( self::SETTINGS_GROUP, $m::OPT_MAIL_METHOD, array( 'type' => 'string', 'sanitize_callback' => array( $this, 'sanitize_mail_method' ), 'default' => 'none' ) );
+		register_setting( self::SETTINGS_GROUP, self::OPT_CONFIRM_TONE,    array( 'type' => 'string', 'sanitize_callback' => array( $this, 'sanitize_tone' ), 'default' => 'formal' ) );
+		register_setting( self::SETTINGS_GROUP, self::OPT_CONFIRM_SUBJECT, array( 'type' => 'string', 'sanitize_callback' => 'sanitize_text_field', 'default' => '' ) );
+		register_setting( self::SETTINGS_GROUP, self::OPT_CONFIRM_BODY,    array( 'type' => 'string', 'sanitize_callback' => 'sanitize_textarea_field', 'default' => '' ) );
+		register_setting( self::SETTINGS_GROUP, self::OPT_CONFIRM_SENDER,  array( 'type' => 'string', 'sanitize_callback' => 'sanitize_text_field', 'default' => '' ) );
+	}
+
+	public function sanitize_tone( $value ) {
+		return 'informal' === $value ? 'informal' : 'formal';
+	}
+
+	/**
+	 * Central read access for the confirmation-email settings.
+	 *
+	 * @return array{tone:string,subject:string,body:string,sender_name:string}
+	 */
+	public static function get_confirmation_settings() {
+		return array(
+			'tone'        => 'informal' === get_option( self::OPT_CONFIRM_TONE, 'formal' ) ? 'informal' : 'formal',
+			'subject'     => trim( (string) get_option( self::OPT_CONFIRM_SUBJECT, '' ) ),
+			'body'        => trim( (string) get_option( self::OPT_CONFIRM_BODY, '' ) ),
+			'sender_name' => trim( (string) get_option( self::OPT_CONFIRM_SENDER, '' ) ),
+		);
 	}
 
 	public function sanitize_preset( $value ) {
@@ -168,6 +195,11 @@ class WK_Mail_Settings {
 		$brevo_sum  = WK_Mail_Presets::summary( 'brevo' );
 		$t_status   = get_option( self::OPT_TEST_STATUS, '' );
 		$t_message  = get_option( self::OPT_TEST_MESSAGE, '' );
+		$confirm    = self::get_confirmation_settings();
+		$lang       = $de ? 'de' : 'en';
+		$cs         = WK_Revocation_Form::strings( $lang );
+		$body_ph    = ( 'informal' === $confirm['tone'] && isset( $cs['confirm_body_du'] ) ) ? $cs['confirm_body_du'] : $cs['confirm_body'];
+		$subject_ph = ( 'informal' === $confirm['tone'] && isset( $cs['confirm_subject_du'] ) ) ? $cs['confirm_subject_du'] : $cs['confirm_subject'];
 		$display    = ( 'none' === $method ) ? 'brevo' : $method;
 		$brevo_url  = $de
 			? 'https://help.brevo.com/hc/de/articles/209467485'
@@ -195,6 +227,48 @@ class WK_Mail_Settings {
 						</td>
 					</tr>
 				</table>
+
+				<h2><?php echo esc_html( $de ? 'Eingangsbestätigung an Kund:innen' : 'Confirmation email to customers' ); ?></h2>
+				<p class="description" style="max-width:640px;margin-bottom:1rem;"><?php echo esc_html( $de
+					? 'Diese E-Mail wird automatisch und unverzüglich nach dem Absenden an den Kunden bzw. die Kundin versendet und enthält Datum und Uhrzeit des Eingangs. Felder leer lassen, um die Standardvorlage zu verwenden.'
+					: 'This email is sent automatically and immediately to the customer after submission and includes the exact date and time of receipt. Leave fields empty to use the default template.' ); ?></p>
+				<table class="form-table" role="presentation">
+					<tr>
+						<th><label for="wk_confirm_tone"><?php echo esc_html( $de ? 'Anrede' : 'Salutation' ); ?></label></th>
+						<td>
+							<select id="wk_confirm_tone" name="<?php echo esc_attr( self::OPT_CONFIRM_TONE ); ?>">
+								<option value="formal" <?php selected( $confirm['tone'], 'formal' ); ?>><?php echo esc_html( $de ? 'Sie (formell)' : 'Formal' ); ?></option>
+								<option value="informal" <?php selected( $confirm['tone'], 'informal' ); ?>><?php echo esc_html( $de ? 'Du (informell)' : 'Informal' ); ?></option>
+							</select>
+							<p class="description"><?php echo esc_html( $de ? 'Bestimmt die Standardvorlage, wenn unten keine eigenen Texte hinterlegt sind.' : 'Sets the default template when no custom texts are provided below.' ); ?></p>
+						</td>
+					</tr>
+					<tr>
+						<th><label for="wk_confirm_sender"><?php echo esc_html( $de ? 'Absendername in Signatur' : 'Sender name in signature' ); ?></label></th>
+						<td>
+							<input type="text" class="regular-text" id="wk_confirm_sender" name="<?php echo esc_attr( self::OPT_CONFIRM_SENDER ); ?>" value="<?php echo esc_attr( $confirm['sender_name'] ); ?>" placeholder="<?php echo esc_attr( wp_specialchars_decode( get_bloginfo( 'name' ), ENT_QUOTES ) ); ?>" />
+							<p class="description"><?php echo esc_html( $de ? 'Erscheint im Platzhalter {sender_name}. Leer = Websitename.' : 'Used for the {sender_name} placeholder. Empty = site name.' ); ?></p>
+						</td>
+					</tr>
+					<tr>
+						<th><label for="wk_confirm_subject"><?php echo esc_html( $de ? 'Betreff' : 'Subject' ); ?></label></th>
+						<td>
+							<input type="text" class="large-text" id="wk_confirm_subject" name="<?php echo esc_attr( self::OPT_CONFIRM_SUBJECT ); ?>" value="<?php echo esc_attr( $confirm['subject'] ); ?>" placeholder="<?php echo esc_attr( $subject_ph ); ?>" />
+							<p class="description"><?php echo esc_html( $de ? 'Leer = Standard je nach Anrede. Platzhalter {site_name} möglich.' : 'Empty = default based on salutation. {site_name} placeholder allowed.' ); ?></p>
+						</td>
+					</tr>
+					<tr>
+						<th><label for="wk_confirm_body"><?php echo esc_html( $de ? 'Text der E-Mail' : 'Email body' ); ?></label></th>
+						<td>
+							<textarea class="large-text code" id="wk_confirm_body" name="<?php echo esc_attr( self::OPT_CONFIRM_BODY ); ?>" rows="12" placeholder="<?php echo esc_attr( $body_ph ); ?>"><?php echo esc_textarea( $confirm['body'] ); ?></textarea>
+							<p class="description"><?php echo esc_html( $de ? 'Leer = Standardvorlage. Verfügbare Platzhalter:' : 'Empty = default template. Available placeholders:' ); ?></p>
+							<p class="description" style="font-family:monospace;line-height:1.8;">
+								<code>{received_at}</code> <code>{first_name}</code> <code>{name}</code> <code>{email}</code> <code>{order_reference}</code> <code>{order_number}</code> <code>{items}</code> <code>{order_date}</code> <code>{received_date}</code> <code>{address}</code> <code>{reason}</code> <code>{declaration}</code> <code>{sender_name}</code> <code>{site_name}</code>
+							</p>
+						</td>
+					</tr>
+				</table>
+
 				<h2><?php echo esc_html( $de ? 'Versandweg einrichten' : 'Configure sending' ); ?></h2>
 				<p class="description" style="max-width:640px;margin-bottom:1rem;"><?php echo esc_html( $de ? 'Damit Formulare zuverlässig ankommen, verbinde ein echtes E-Mail-Postfach oder einen Versanddienst wie Brevo.' : 'For reliable delivery, connect a real email mailbox or a sending service like Brevo.' ); ?></p>
 				<div class="wk-cf-methods">

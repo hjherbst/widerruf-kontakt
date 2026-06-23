@@ -4,6 +4,13 @@ All notable changes to this project are documented here.
 Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 versioning follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.2.2] – 2026-06-19
+
+### Geändert
+- Admin-Menü in der Sidebar: nur „Widerruf"
+- Brevo-Einrichtung: Video-Anleitung nur auf deutschen Sites (englische Oberfläche ohne Video)
+- Englische SMTP-Schritttexte in den E-Mail-Einstellungen korrigiert
+
 ## [1.2.1] – 2026-06-19
 
 ### Geändert

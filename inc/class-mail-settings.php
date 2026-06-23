@@ -214,9 +214,8 @@ class WK_Mail_Settings {
 			),
 		);
 		$display    = ( 'none' === $method ) ? 'brevo' : $method;
-		$brevo_url  = $de
-			? 'https://help.brevo.com/hc/de/articles/209467485'
-			: 'https://help.brevo.com/hc/en-us/articles/209467485';
+		$brevo_url  = 'https://get.brevo.com/3s6b626q5b6r';
+		$brevo_embed = 'https://www.youtube-nocookie.com/embed/MOKCPqNcOcU?start=179';
 		$this->print_inline_assets( $de );
 		?>
 		<div class="wrap wk-mail-settings" data-method="<?php echo esc_attr( $display ); ?>">
@@ -314,10 +313,14 @@ class WK_Mail_Settings {
 					?>
 				</div>
 
-				<div class="wk-cf-panel" data-panel="brevo">
+				<div class="wk-cf-panel<?php echo $de ? ' wk-cf-panel--with-video' : ''; ?>" data-panel="brevo">
+					<?php if ( $de ) : ?>
+					<div class="wk-cf-brevo-layout">
+						<div class="wk-cf-brevo-main">
+					<?php endif; ?>
 					<ol class="wk-cf-steps">
-						<li><?php echo esc_html( $de ? 'Kostenloses Konto bei Brevo erstellen und Absender bestätigen.' : 'Create a free Brevo account and confirm your sender address.' ); ?></li>
-						<li><?php printf( $de ? 'Unter "SMTP &amp; API" einen %s erzeugen.' : 'Under "SMTP &amp; API", create a %s.', '<a href="' . esc_url( $brevo_url ) . '" target="_blank" rel="noopener noreferrer">' . ( $de ? 'SMTP-Schlüssel' : 'SMTP key' ) . '</a>' ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?></li>
+						<li><?php printf( $de ? 'Kostenloses Konto bei %s erstellen und Absender bestätigen.' : 'Create a free %s account and confirm your sender address.', '<a href="' . esc_url( $brevo_url ) . '" target="_blank" rel="noopener noreferrer">Brevo</a>' ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?></li>
+						<li><?php echo esc_html( $de ? 'Unter „SMTP & API“ einen SMTP-Schlüssel erzeugen (siehe Video rechts).' : 'Under “SMTP & API”, create an SMTP key (not the API key).' ); ?></li>
 						<li><?php echo esc_html( $de ? 'Anmeldung und SMTP-Schlüssel aus „Deine SMTP-Einstellungen“ unten einfügen.' : 'Paste the login and SMTP key from “Your SMTP settings” below.' ); ?></li>
 					</ol>
 					<table class="form-table" role="presentation">
@@ -339,6 +342,16 @@ class WK_Mail_Settings {
 						<tr><th><label for="wk_brevo_from_name"><?php echo esc_html( $de ? 'Absender-Name' : 'From name' ); ?></label></th><td><input type="text" class="regular-text" id="wk_brevo_from_name" name="wk_brevo_from_name" value="<?php echo 'brevo' === $method ? esc_attr( $from_name ) : ''; ?>" /></td></tr>
 					</table>
 					<p class="description"><?php printf( $de ? 'Automatisch gesetzt: %s' : 'Auto-set: %s', '<code>' . esc_html( $brevo_sum ) . '</code>' ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?></p>
+					<?php if ( $de ) : ?>
+						</div>
+						<aside class="wk-cf-brevo-video" aria-label="<?php echo esc_attr( 'Video-Anleitung Brevo SMTP' ); ?>">
+							<p class="wk-cf-video-label"><?php echo esc_html( 'Video-Anleitung' ); ?></p>
+							<div class="wk-cf-video-wrap">
+								<iframe src="<?php echo esc_url( $brevo_embed ); ?>" title="<?php echo esc_attr( 'Brevo SMTP einrichten' ); ?>" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen loading="lazy"></iframe>
+							</div>
+						</aside>
+					</div>
+					<?php endif; ?>
 				</div>
 
 				<div class="wk-cf-panel" data-panel="mailbox">
@@ -417,6 +430,17 @@ class WK_Mail_Settings {
 		.wk-mail-settings[data-method="brevo"] .wk-cf-panel[data-panel="brevo"],
 		.wk-mail-settings[data-method="mailbox"] .wk-cf-panel[data-panel="mailbox"],
 		.wk-mail-settings[data-method="manual"] .wk-cf-panel[data-panel="manual"]{display:block}
+		.wk-mail-settings[data-method="brevo"] .wk-cf-panel--with-video{max-width:none;width:100%;box-sizing:border-box}
+		.wk-cf-brevo-layout{display:flex;gap:2rem;align-items:flex-start;width:100%}
+		.wk-cf-brevo-main{flex:0 0 calc(50% - 1rem);max-width:calc(50% - 1rem);min-width:0;box-sizing:border-box}
+		.wk-cf-brevo-video{flex:0 0 calc(50% - 1rem);max-width:calc(50% - 1rem);min-width:0;box-sizing:border-box;position:sticky;top:32px}
+		.wk-cf-brevo-main .wk-cf-steps{max-width:none}
+		.wk-cf-brevo-main .form-table th{width:130px;padding-right:8px;vertical-align:top;padding-top:12px}
+		.wk-cf-brevo-main .form-table td .regular-text{width:100%;max-width:100%;box-sizing:border-box}
+		.wk-cf-video-label{margin:0 0 .75rem;font-weight:600;font-size:13px;color:#1d2327}
+		.wk-cf-video-wrap{position:relative;width:100%;padding-bottom:56.25%;height:0;overflow:hidden;border-radius:6px;background:#000}
+		.wk-cf-video-wrap iframe{position:absolute;top:0;left:0;width:100%;height:100%;border:0}
+		@media(max-width:960px){.wk-cf-brevo-layout{flex-direction:column;gap:1.5rem}.wk-cf-brevo-main,.wk-cf-brevo-video{flex:0 0 100%;max-width:100%;position:static}}
 		.wk-cf-steps{max-width:640px;margin:1rem 0;padding-left:1.4rem;line-height:1.6}
 		.wk-cf-test-result{margin-left:10px;font-weight:500}.wk-cf-test-result.is-ok{color:#008a20}.wk-cf-test-result.is-fail{color:#d63638}
 		</style>

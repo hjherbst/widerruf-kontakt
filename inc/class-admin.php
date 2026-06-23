@@ -27,7 +27,7 @@ class WK_Admin {
 		$de = wk_is_de();
 		add_menu_page(
 			$de ? 'Widerruf & Kontakt' : 'Widerruf & Kontakt',
-			'Widerruf & Kontakt',
+			'Widerruf',
 			'manage_options',
 			'widerruf-kontakt',
 			array( $this, 'render_guide' ),

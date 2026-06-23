@@ -4,7 +4,7 @@ Tags: widerruf, widerrufsformular, kontaktformular, withdrawal, contact form, DS
 Requires at least: 6.3
 Tested up to: 6.8
 Requires PHP: 7.4
-Stable tag: 1.1.1
+Stable tag: 1.2.2
 License: GPL-2.0-or-later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
